@@ -41,6 +41,7 @@ export const LENS = {
    those parts used before hand placement. Declared before ANCHOR so ANCHOR.evf
    (below) can read zoomTarget's position directly instead of duplicating it. ---- */
 export const PLACEMENT: Record<string, { position: Vec3; rotation: Vec3; scale: Vec3 }> = {
+  body: { position: [0, 0, -0.403], rotation: [0, 0.268, 0], scale: [1, 1, 1] },
   lens: { position: [0.209, -0.109, 0.469], rotation: [-0.012, 0.001, -0.007], scale: [1.264, 1.264, 1.264] },
   capCover: { position: [0.209, -0.109, -0.012], rotation: [-0.012, 0.001, -0.007], scale: [0.781, 0.781, 3.022] },
   sensor: { position: [0.209, -0.109, -0.009], rotation: [-0.012, 0.001, -0.007], scale: [0.97, 0.97, 0.97] },
@@ -52,6 +53,10 @@ export const PLACEMENT: Record<string, { position: Vec3; rotation: Vec3; scale: 
      export. The photo itself is rendered here directly (CameraModel's
      ViewfinderPhoto), not approximated by a separate DOM layer. */
   zoomTarget: { position: [0.211, 0.445, -0.926], rotation: [0, 0, 0], scale: [0.25, 0.181, 1.389] },
+  lcdScreen: { position: [0.284, -0.283, -0.903], rotation: [-0.01, -0.002, 0], scale: [1.09, 0.813, 1.277] },
+  playButton: { position: [-0.493, -0.616, -0.930], rotation: [0, 0, 0], scale: [1, 1, 1] },
+  menuButton: { position: [0.590, 0.280, -0.942], rotation: [0, 0, 0], scale: [1.84, 0.865, 1] },
+  shutterButton: { position: [-0.671, 0.465, -0.121], rotation: [0, 0, 0], scale: [2.427, 2.427, 2.427] },
 };
 
 /* ---- anchors: the point each part lives at, in normalised model space ----
@@ -64,10 +69,10 @@ export const ANCHOR: Record<string, Vec3> = {
   rear: [-0.312, 0.05, -1.541], // rear screen / eyepiece — the hero lives here
   evf: PLACEMENT.zoomTarget.position, // viewfinder hump — same point the photo actually lives at, so the "01 VIEWFINDER" label's leader-line points at it, not a separate guess
   lensMid: [0.417, -0.03, 0.623], // middle of the lens barrel (seated centre ≈ 1.08)
-  lensFront: [0.523, -0.03, 1.009], // front element / iris (front glass ≈ 1.61)
+  lensFront: [-0.105, -0.03, 1.009], // front element / iris (front glass ≈ 1.61)
   mount: [0.438, -0.03, 0.7], // open lens-mount plane — shutter + sensor live here
-  sensor: [0.438, -0.03, 0.7], // built sensor, seated in the open mount
-  body: [0.139, 0.04, -0.389], // body core — processor
+  sensor: [-0.02, -0.03, 0.7], // built sensor, seated in the open mount
+  body: [-0.139, 0.04, -0.389], // body core — processor
 };
 
 /* world-Z of the built sensor / cap-cover plate, seated clearly in front of the
@@ -236,7 +241,7 @@ export const SHOTS: Shot[] = [
   { p: 0.58, focus: [0.207, -0.118, 0.58], dir: [0.018, 0.046, 0.998], dist: 2.568 }, // lens off — dead-on into the open mount (shutter)
   { p: 0.72, focus: [0.21, -0.114, 0.705], dir: [0.016, 0.037, 0.99], dist: 1.172 }, // dead-on into the mount — the sensor
   { p: 0.87, focus: "body", dir: [-0.77, 0.267, 0.58], dist: 4.866 }, // processor — whole body, 3/4
-  { p: 1.0, focus: "body", dir: [-0.003, 0.258, -0.966], dist: 3.398 }, // settle on a clean 3/4 (lens back on)
+  { p: 0.97, focus: "body", dir: [-0.003, 0.258, -0.966], dist: 3.398 }, // settle on a clean 3/4 (lens back on)
 ];
 
 /* ---- math helpers (shared) ---- */

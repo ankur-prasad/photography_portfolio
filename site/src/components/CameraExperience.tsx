@@ -1,10 +1,14 @@
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState, useContext } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import { AnimatePresence, motion } from "framer-motion";
 import * as THREE from "three";
+import { Link } from "react-router-dom";
 import CameraModel from "./CameraModel";
-import { PARTS, beatFor, clamp01, samplePose } from "../data/cameraScript";
+import Gallery from "./Gallery";
+import Inquiry from "./Inquiry";
+import { PARTS, beatFor, clamp01, samplePose, PLACEMENT } from "../data/cameraScript";
+import { LenisContext } from "../lib/LenisContext";
 
 /* the viewfinder flipbook — opens FULL-BLEED on water (ANK00641, "Surface"),
    riffles through a handful of frames, then LANDS on the eye close-up and
@@ -28,11 +32,19 @@ const VIEWFINDER_CYCLE = [
 const DEBUG = typeof window !== "undefined" && window.location.search.includes("debug");
 
 /* ---------- viewing-camera rig: flies to centre each part ---------- */
-function CameraRig({ progress }: { progress: React.MutableRefObject<number> }) {
+function CameraRig({ 
+  progress, 
+  interactionMode 
+}: { 
+  progress: React.MutableRefObject<number>;
+  interactionMode: "normal" | "zoomed-gallery" | "contact" | "menu";
+}) {
   const { camera } = useThree();
   const advance = useThree((s) => s.advance);
   const cur = useRef(0);
-  const tgt = useRef(new THREE.Vector3(0, 0, -1));
+  const curPos = useRef(new THREE.Vector3());
+  const curTgt = useRef(new THREE.Vector3());
+
   // debug: manually pump frames so static captures work even when the tab is
   // backgrounded (rAF is throttled when document.hidden)
   useEffect(() => {
@@ -41,6 +53,7 @@ function CameraRig({ progress }: { progress: React.MutableRefObject<number> }) {
       for (let i = 0; i < n; i++) advance(performance.now() + i * 16);
     };
   }, [advance]);
+
   useFrame((_, dt) => {
     const ovr = DEBUG ? (window as unknown as { __ovr?: { pos: number[]; target: number[] } }).__ovr : undefined;
     if (ovr) {
@@ -48,15 +61,34 @@ function CameraRig({ progress }: { progress: React.MutableRefObject<number> }) {
       camera.lookAt(ovr.target[0], ovr.target[1], ovr.target[2]);
       return;
     }
-    // Track scroll tightly — Lenis already eases the scroll position, so a
-    // heavy second smoothing here only adds lag (see CameraModel for the same
-    // fix). The viewing camera now arrives at each part's shot in step with the
-    // scroll instead of trailing ~0.2s behind it.
+
+    // Determine the base scroll pose
     cur.current += (progress.current - cur.current) * (DEBUG ? 1 : Math.min(1, dt * 18));
-    const { pos, target } = samplePose(cur.current);
-    camera.position.set(pos[0], pos[1], pos[2]);
-    tgt.current.set(target[0], target[1], target[2]);
-    camera.lookAt(tgt.current);
+    const scrollPose = samplePose(cur.current);
+
+    const targetPos = new THREE.Vector3(scrollPose.pos[0], scrollPose.pos[1], scrollPose.pos[2]);
+    const targetLook = new THREE.Vector3(scrollPose.target[0], scrollPose.target[1], scrollPose.target[2]);
+
+    if (interactionMode === "zoomed-gallery") {
+      const screenPos = PLACEMENT.lcdScreen.position; // [-0.14, 0.06, -0.94]
+      const D = 0.72; // Zoom distance to screen
+      targetPos.set(screenPos[0], screenPos[1], screenPos[2] - D);
+      targetLook.set(screenPos[0], screenPos[1], screenPos[2]);
+    }
+
+    // Smoothly interpolate camera position and look-at target
+    const easeFactor = Math.min(1, dt * 7.5);
+    
+    if (curPos.current.lengthSq() === 0) {
+      curPos.current.copy(camera.position);
+      curTgt.current.copy(targetLook);
+    }
+
+    curPos.current.lerp(targetPos, easeFactor);
+    curTgt.current.lerp(targetLook, easeFactor);
+
+    camera.position.copy(curPos.current);
+    camera.lookAt(curTgt.current);
   });
   return null;
 }
@@ -81,6 +113,9 @@ export default function CameraExperience() {
   const progress = useRef(0);
   const [beat, setBeat] = useState(0);
   const [phase, setPhase] = useState<ReturnType<typeof phaseFor>>("hero");
+  const [interactionMode, setInteractionMode] = useState<"normal" | "zoomed-gallery" | "contact" | "menu">("normal");
+  const [shutterFlash, setShutterFlash] = useState(false);
+  const lenis = useContext(LenisContext);
 
   useEffect(() => {
     let raf = 0;
@@ -121,6 +156,21 @@ export default function CameraExperience() {
     };
   }, []);
 
+  // Lock Lenis and body scroll when in interactive overlays
+  useEffect(() => {
+    if (interactionMode !== "normal") {
+      document.body.style.overflow = "hidden";
+      lenis?.stop();
+    } else {
+      document.body.style.overflow = "";
+      lenis?.start();
+    }
+    return () => {
+      document.body.style.overflow = "";
+      lenis?.start();
+    };
+  }, [interactionMode, lenis]);
+
   const part = beat >= 1 && beat <= 6 ? PARTS[beat - 1] : null;
 
   // High-DPR phone GPUs rendering WebGL at native 3x is the main mobile perf
@@ -128,6 +178,57 @@ export default function CameraExperience() {
   // lighter). Desktop keeps the full 2x.
   const dprMax =
     typeof window !== "undefined" && Math.min(window.innerWidth, window.innerHeight) < 768 ? 1.5 : 2;
+
+  // Synthesize a camera shutter click sound using Web Audio API (no heavy MP3 needed)
+  const playShutterSound = () => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      const playClick = (time: number, freq: number, gainVal: number) => {
+        const bufferSize = ctx.sampleRate * 0.05; // 50ms burst
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        
+        const filter = ctx.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.value = freq;
+        filter.Q.value = 3.0;
+        
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(gainVal, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
+        
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start(time);
+      };
+      
+      const now = ctx.currentTime;
+      playClick(now, 1600, 0.4); // opening curtain (higher pitch)
+      playClick(now + 0.08, 1200, 0.35); // closing curtain (lower pitch)
+      
+      setTimeout(() => {
+        ctx.close().catch(() => {});
+      }, 300);
+    } catch {
+      // AudioContext fallback
+    }
+  };
+
+  const handleShutterClick = () => {
+    playShutterSound();
+    setShutterFlash(true);
+    setTimeout(() => {
+      setInteractionMode("contact");
+    }, 150);
+  };
 
   return (
     <section className="camera-act" ref={section}>
@@ -142,7 +243,7 @@ export default function CameraExperience() {
             }}
           >
             <Suspense fallback={null}>
-              <CameraRig progress={progress} />
+              <CameraRig progress={progress} interactionMode={interactionMode} />
               <ambientLight intensity={0.6} />
               <directionalLight position={[3, 4, 2]} intensity={2.1} />
               <directionalLight position={[-3, 1.5, -2]} intensity={0.9} color="#f0a060" />
@@ -155,7 +256,17 @@ export default function CameraExperience() {
                 <Lightformer form="rect" intensity={2.4} position={[0, -2, -3]} scale={[6, 3, 1]} color="#ffffff" />
                 <Lightformer form="ring" intensity={2.6} position={[2.5, 0.5, -2]} scale={2} color="#f0883e" />
               </Environment>
-              <CameraModel progress={progress} beat={beat} photos={VIEWFINDER_CYCLE} debug={DEBUG} />
+              <CameraModel 
+                progress={progress} 
+                beat={beat} 
+                photos={VIEWFINDER_CYCLE} 
+                debug={DEBUG}
+                interactionMode={interactionMode}
+                showHotspots={phase === "handoff"}
+                onPlayClick={() => setInteractionMode("zoomed-gallery")}
+                onMenuClick={() => setInteractionMode("menu")}
+                onShutterClick={handleShutterClick}
+              />
             </Suspense>
           </Canvas>
         </div>
@@ -192,7 +303,7 @@ export default function CameraExperience() {
 
         {/* ---------- per-part narration ---------- */}
         <AnimatePresence mode="wait">
-          {part && (
+          {part && interactionMode === "normal" && (
             <motion.div
               key={part.no}
               className={`act-copy ${part.side}`}
@@ -214,15 +325,17 @@ export default function CameraExperience() {
         {/* ---------- thesis ---------- */}
         <div
           className="act-thesis"
-          style={{ opacity: phase === "thesis" || phase === "handoff" ? 1 : 0, transition: "opacity 0.7s" }}
+          style={{ 
+            opacity: phase === "thesis" && interactionMode === "normal" ? 1 : 0, 
+            transition: "opacity 1.0s ease-in-out",
+            pointerEvents: "none" 
+          }}
         >
-          {(phase === "thesis" || phase === "handoff") && (
-            <p>
-              One tool to freeze time in a single frame.
-              <br />
-              And these are some moments <span className="accent">I decided to freeze.</span>
-            </p>
-          )}
+          <p>
+            One tool to freeze time in a single frame.
+            <br />
+            And these are some moments <span className="accent">I decided to freeze.</span>
+          </p>
         </div>
 
         {/* ---------- scroll hint ---------- */}
@@ -230,6 +343,144 @@ export default function CameraExperience() {
           <span className="dot" />
           scroll — the image is alive
         </div>
+
+        {/* ---------- shutter flash animation ---------- */}
+        <AnimatePresence>
+          {shutterFlash && (
+            <motion.div
+              className="shutter-flash"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onAnimationComplete={() => setShutterFlash(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* ---------- gallery screen zoom overlay ---------- */}
+        <AnimatePresence>
+          {interactionMode === "zoomed-gallery" && (
+            <motion.div
+              className="gallery-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, delay: 0.15 }}
+            >
+              <button
+                className="overlay-close-btn"
+                onClick={(e) => { e.stopPropagation(); setInteractionMode("normal"); }}
+                onPointerDown={(e) => { e.stopPropagation(); setInteractionMode("normal"); }}
+              >
+                ✕ Exit Screen
+              </button>
+              <div className="gallery-overlay-scrollable" data-lenis-prevent>
+                <div className="gallery-overlay-content-wrapper" onClick={(e) => e.stopPropagation()}>
+                  <Gallery />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ---------- contact/shutter overlay ---------- */}
+        <AnimatePresence>
+          {interactionMode === "contact" && (
+            <motion.div
+              className="contact-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <button
+                className="overlay-close-btn"
+                onClick={(e) => { e.stopPropagation(); setInteractionMode("normal"); }}
+                onPointerDown={(e) => { e.stopPropagation(); setInteractionMode("normal"); }}
+              >
+                ✕ Close Form
+              </button>
+              <div className="contact-overlay-scrollable" data-lenis-prevent>
+                <div className="contact-overlay-content-wrapper" onClick={(e) => e.stopPropagation()}>
+                  <Inquiry />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ---------- menu overlay ---------- */}
+        <AnimatePresence>
+          {interactionMode === "menu" && (
+            <motion.div
+              className="menu-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setInteractionMode("normal");
+                }
+              }}
+            >
+              <motion.div
+                className="menu-drawer-panel"
+                data-lenis-prevent
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <button
+                  className="overlay-close-btn"
+                  onClick={(e) => { e.stopPropagation(); setInteractionMode("normal"); }}
+                  onPointerDown={(e) => { e.stopPropagation(); setInteractionMode("normal"); }}
+                >
+                  ✕ Close Menu
+                </button>
+                <div className="menu-overlay-content">
+                  <span className="menu-eyebrow">// Navigation</span>
+                  <div className="menu-links-list">
+                    <Link to="/work" className="menu-link-item" onClick={() => setInteractionMode("normal")}>
+                      <span className="num">01</span>
+                      <span className="text">Selected Work</span>
+                      <span className="kicker">Night & light, land & layers</span>
+                    </Link>
+                    <Link to="/prints" className="menu-link-item" onClick={() => setInteractionMode("normal")}>
+                      <span className="num">02</span>
+                      <span className="text">Fine Art Prints</span>
+                      <span className="kicker">Archival gallery prints</span>
+                    </Link>
+                    <Link to="/about" className="menu-link-item" onClick={() => setInteractionMode("normal")}>
+                      <span className="num">03</span>
+                      <span className="text">About Me</span>
+                      <span className="kicker">Photographer × AI Engineer</span>
+                    </Link>
+                    <Link to="/services" className="menu-link-item" onClick={() => setInteractionMode("normal")}>
+                      <span className="num">04</span>
+                      <span className="text">Services</span>
+                      <span className="kicker">Creative development & commissions</span>
+                    </Link>
+                    <a 
+                      href="#contact" 
+                      className="menu-link-item" 
+                      onClick={(e) => { 
+                        e.preventDefault(); 
+                        setInteractionMode("contact"); 
+                      }}
+                    >
+                      <span className="num">05</span>
+                      <span className="text">Work With Me</span>
+                      <span className="kicker">Drop an inquiry brief</span>
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

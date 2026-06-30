@@ -391,7 +391,7 @@ button {
    ============================================================ */
 .camera-act {
   position: relative;
-  height: 760vh;          /* scroll length that scrubs the 3D timeline */
+  height: 980vh;          /* scroll length that scrubs the 3D timeline */
 }
 .camera-stage {
   position: sticky;
@@ -531,6 +531,9 @@ button {
   align-items: center;
   gap: 9px;
   user-select: none;
+}
+.cam-label.left {
+  transform: translate(-100%, -50%);
 }
 .cam-label .line {
   width: 52px;
@@ -1720,3 +1723,242 @@ button {
   .inquiry-trust { grid-template-columns: repeat(2, 1fr); }
   .colophon { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   INTERACTIVE CAMERA INTERFACE & OVERLAYS
+   ============================================================ */
+
+/* 3D Hotspots on physical camera body buttons */
+.cam-hotspot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 10;
+  transform: translate(-50%, -50%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cam-hotspot:hover {
+  transform: translate(-50%, -55%) scale(1.15);
+}
+.cam-hotspot-ring {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  opacity: 0.75;
+  animation: hotspot-pulse 2.2s infinite ease-in-out;
+  pointer-events: none;
+}
+.cam-hotspot-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  pointer-events: none;
+  transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+.cam-hotspot:hover .cam-hotspot-dot {
+  background: var(--fg);
+  box-shadow: 0 0 16px var(--fg);
+  transform: scale(1.2);
+}
+.cam-hotspot-label {
+  position: absolute;
+  left: 34px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg);
+  background: rgba(8, 8, 10, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.85;
+  transition: opacity 0.3s, border-color 0.3s, background-color 0.3s;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.cam-hotspot:hover .cam-hotspot-label {
+  opacity: 1;
+  border-color: var(--accent);
+  background: rgba(8, 8, 10, 0.9);
+}
+
+@keyframes hotspot-pulse {
+  0% { transform: scale(0.7); opacity: 0.85; }
+  50% { transform: scale(1.4); opacity: 0.15; }
+  100% { transform: scale(0.7); opacity: 0.85; }
+}
+
+/* Shutter flash animation layer */
+.shutter-flash {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  z-index: 999;
+  pointer-events: none;
+}
+
+/* Base overlay styling */
+.gallery-overlay,
+.contact-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(11, 11, 13, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--fg);
+}
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(8, 8, 10, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--fg);
+}
+
+/* Exit/Close button inside overlays */
+.overlay-close-btn {
+  position: fixed;
+  top: clamp(20px, 4vh, 40px);
+  right: clamp(20px, 4vw, 40px);
+  z-index: 110;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--fg);
+  padding: 8px 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+.overlay-close-btn:hover {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+
+/* Specific close button position within drawer panel */
+.menu-drawer-panel .overlay-close-btn {
+  position: absolute;
+  top: clamp(20px, 4vh, 40px);
+  right: clamp(20px, 6vw, 40px);
+}
+
+/* Scrollable containers inside overlays */
+.gallery-overlay-scrollable,
+.contact-overlay-scrollable {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: clamp(60px, 12vh, 140px) 0 clamp(40px, 8vh, 100px);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Centered content wrappers that prevent clicks from closing modal */
+.gallery-overlay-content-wrapper,
+.contact-overlay-content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 40px);
+  pointer-events: auto;
+}
+.contact-overlay-content-wrapper {
+  max-width: 760px;
+}
+
+/* Site Menu Overlay Drawer Panel */
+.menu-drawer-panel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 480px;
+  background: rgba(11, 11, 13, 0.98);
+  border-right: 1px solid #2a2a30;
+  box-shadow: 15px 0 50px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  padding: 80px clamp(30px, 6vw, 60px) 60px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.menu-overlay-content {
+  width: 100%;
+}
+.menu-eyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: clamp(30px, 5vh, 50px);
+}
+.menu-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 4vh, 36px);
+}
+.menu-link-item {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  grid-template-rows: auto auto;
+  text-decoration: none;
+  transition: opacity 0.3s;
+}
+.menu-link-item .num {
+  grid-row: span 2;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+  padding-top: 3px;
+  transition: color 0.3s;
+}
+.menu-link-item .text {
+  font-size: clamp(20px, 2.5vw, 26px);
+  font-weight: 500;
+  color: var(--fg);
+  line-height: 1.2;
+  transition: color 0.3s, transform 0.3s;
+}
+.menu-link-item .kicker {
+  grid-column: 2;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.menu-link-item:hover .text {
+  color: var(--accent);
+  transform: translateX(4px);
+}
+.menu-link-item:hover .num {
+  color: var(--accent-dim);
+}
+
+@media (max-width: 600px) {
+  .menu-drawer-panel {
+    max-width: 100%;
+    border-right: none;
+  }
+}
+

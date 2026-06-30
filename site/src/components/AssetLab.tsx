@@ -4,7 +4,7 @@ import { Line, OrbitControls, TransformControls, useGLTF, Environment, Grid, Lig
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
-  BODY_FIT, BODY_OFFSET, BODY_ROTATION, LENS, ANCHOR, SENSOR_Z, PLACEMENT, SHOTS,
+  BODY_FIT, BODY_OFFSET, BODY_ROTATION, LENS, ANCHOR, PLACEMENT, SHOTS,
   lerp, smoothstep, shotToPose, type Shot, type Vec3,
 } from "../data/cameraScript";
 
@@ -25,7 +25,7 @@ const LENS_URL = "/models/camera_lens.glb";
 useGLTF.preload(BODY_URL);
 useGLTF.preload(LENS_URL);
 
-const LS_KEY = "assetlab.transforms.v1";
+const LS_KEY = "assetlab.transforms.v2";
 const SHOTS_LS_KEY = "assetlab.shots.v1";
 
 type Tab = "parts" | "framing";
@@ -35,11 +35,16 @@ type TF = { position: [number, number, number]; rotation: [number, number, numbe
 /* initial transforms = current values from the live experience */
 const INITIAL: Record<string, TF> = {
   body: { position: [...BODY_OFFSET], rotation: [...BODY_ROTATION], scale: [1, 1, 1] },
-  capCover: { position: [ANCHOR.mount[0], ANCHOR.mount[1], SENSOR_Z], rotation: [0, 0, 0], scale: [1, 1, 1] },
-  sensor: { position: [ANCHOR.mount[0], ANCHOR.mount[1], SENSOR_Z + 0.012], rotation: [0, 0, 0], scale: [1, 1, 1] },
-  shutter: { position: [ANCHOR.mount[0], ANCHOR.mount[1], SENSOR_Z + 0.045], rotation: [0, 0, 0], scale: [1, 1, 1] },
-  iris: { position: [ANCHOR.mount[0], ANCHOR.mount[1], 1.48], rotation: [0, 0, 0], scale: [0.6, 0.6, 0.6] },
+  lens: { ...PLACEMENT.lens },
+  capCover: { ...PLACEMENT.capCover },
+  sensor: { ...PLACEMENT.sensor },
+  shutter: { ...PLACEMENT.shutter },
+  iris: { ...PLACEMENT.iris },
   zoomTarget: { ...PLACEMENT.zoomTarget },
+  lcdScreen: { ...PLACEMENT.lcdScreen },
+  playButton: { ...PLACEMENT.playButton },
+  menuButton: { ...PLACEMENT.menuButton },
+  shutterButton: { ...PLACEMENT.shutterButton },
 };
 
 function loadSaved(): Record<string, TF> {
@@ -107,25 +112,20 @@ function Body({
 }
 
 /* ---------------- the lens (selectable wrapper at its seated transform) ---------------- */
-function Lens({ transmission, selectRef }: { transmission: number; selectRef: (o: THREE.Object3D | null) => void }) {
+function Lens({
+  tf, transmission, selectRef, onSelect,
+}: { tf: TF; transmission: number; selectRef: (o: THREE.Object3D | null) => void; onSelect: () => void }) {
   const { scene } = useGLTF(LENS_URL);
-  const { node, seat } = useMemo(() => {
+  const node = useMemo(() => {
     const s = scene.clone(true);
     s.rotation.set(0, Math.PI / 2, 0);
     const box = new THREE.Box3().setFromObject(s);
     const size = new THREE.Vector3(); box.getSize(size);
     const scale = LENS.diameter / Math.max(size.x, size.y);
     s.scale.setScalar(scale);
-    const box2 = new THREE.Box3().setFromObject(s);
-    const c2 = new THREE.Vector3(); box2.getCenter(c2);
-    const seat: [number, number, number] = [
-      ANCHOR.mount[0] - c2.x,
-      ANCHOR.mount[1] - c2.y,
-      ANCHOR.mount[2] - box2.min.z + LENS.seatZ,
-    ];
     // bake position into a fresh group; keep node centred so the gizmo sits on it
     s.position.set(0, 0, 0);
-    return { node: s, seat };
+    return s;
   }, [scene]);
 
   useMemo(() => {
@@ -136,7 +136,14 @@ function Lens({ transmission, selectRef }: { transmission: number; selectRef: (o
   }, [node, transmission]);
 
   return (
-    <group ref={selectRef} name="lens" position={seat} onClick={(e) => { e.stopPropagation(); }}>
+    <group
+      ref={selectRef}
+      name="lens"
+      position={tf.position}
+      rotation={tf.rotation}
+      scale={tf.scale}
+      onClick={(e) => { e.stopPropagation(); onSelect(); }}
+    >
       <primitive object={node} />
     </group>
   );
@@ -219,12 +226,39 @@ function Iris() {
   );
 }
 
+function LcdScreen() {
+  return (
+    <group>
+      <mesh><planeGeometry args={[1, 1]} /><meshBasicMaterial color="#0088ff" transparent opacity={0.4} side={THREE.DoubleSide} /></mesh>
+    </group>
+  );
+}
+function PlayButton() {
+  return (
+    <mesh><sphereGeometry args={[0.04, 16, 16]} /><meshBasicMaterial color="#ff0088" transparent opacity={0.6} /></mesh>
+  );
+}
+function MenuButton() {
+  return (
+    <mesh><sphereGeometry args={[0.04, 16, 16]} /><meshBasicMaterial color="#ffcc00" transparent opacity={0.6} /></mesh>
+  );
+}
+function ShutterButton() {
+  return (
+    <mesh><sphereGeometry args={[0.04, 16, 16]} /><meshBasicMaterial color="#00ffcc" transparent opacity={0.6} /></mesh>
+  );
+}
+
 const PARTS: { key: string; label: string; Comp: React.FC }[] = [
   { key: "capCover", label: "Cap cover", Comp: CapCover },
   { key: "sensor", label: "Sensor", Comp: Sensor },
   { key: "shutter", label: "Shutter", Comp: Shutter },
   { key: "iris", label: "Iris + glow", Comp: Iris },
   { key: "zoomTarget", label: "Zoom target", Comp: ZoomTarget },
+  { key: "lcdScreen", label: "LCD Screen", Comp: LcdScreen },
+  { key: "playButton", label: "Play Button", Comp: PlayButton },
+  { key: "menuButton", label: "Menu Button", Comp: MenuButton },
+  { key: "shutterButton", label: "Shutter Button", Comp: ShutterButton },
 ];
 
 /* ---------------- framing preview: drives the canvas camera along the
@@ -374,7 +408,7 @@ function Scene({
 
       <Suspense fallback={null}>
         <Body tf={saved.body} selectRef={(o) => (refs.current.body = o)} onSelect={() => onSelect("body")} />
-        <Lens transmission={transmission} selectRef={(o) => (refs.current.lens = o)} />
+        <Lens tf={saved.lens || INITIAL.lens} transmission={transmission} selectRef={(o) => (refs.current.lens = o)} onSelect={() => onSelect("lens")} />
       </Suspense>
 
       {PARTS.map(({ key, Comp }) => {

@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { Html, useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import {
-  ANCHOR, LENS, BODY_FIT, BODY_OFFSET, BODY_ROTATION, PLACEMENT, PARTS,
+  ANCHOR, LENS, BODY_FIT, PLACEMENT, PARTS,
   lensVisFor, mountOpenFor, sensorVisFor, shutterVisFor, shutterOpenFor, irisOpenFor,
   lensGlassDipFor, frontGlassDipFor, viewfinderIndexFor,
   smoothstep, type Part,
@@ -173,14 +173,8 @@ function useNormalisedBody() {
     box.getSize(size);
     box.getCenter(center);
     const scale = BODY_FIT / size.y;
-    s.rotation.set(BODY_ROTATION[0], BODY_ROTATION[1], BODY_ROTATION[2]);
-    const rotatedCenter = center.clone().applyEuler(s.rotation);
     s.scale.setScalar(scale);
-    s.position.set(
-      -rotatedCenter.x * scale + BODY_OFFSET[0],
-      -rotatedCenter.y * scale + BODY_OFFSET[1],
-      -rotatedCenter.z * scale + BODY_OFFSET[2]
-    );
+    s.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
     s.updateMatrixWorld(true);
 
     // ---- runtime split: isolate the baked-in lens plug from the body ----
@@ -355,9 +349,21 @@ export interface CameraModelProps {
   beat: number;
   photos: string[];
   debug?: boolean;
+  interactionMode?: "normal" | "zoomed-gallery" | "contact" | "menu";
+  showHotspots?: boolean;
+  onPlayClick?: () => void;
+  onMenuClick?: () => void;
+  onShutterClick?: () => void;
 }
 
-export default function CameraModel({ progress, beat, photos, debug }: CameraModelProps) {
+export default function CameraModel({
+  progress, beat, photos, debug,
+  interactionMode = "normal",
+  showHotspots = false,
+  onPlayClick,
+  onMenuClick,
+  onShutterClick,
+}: CameraModelProps) {
   const root = useRef<THREE.Group>(null);
   const body = useNormalisedBody();
   const lens = useMountedLens();
@@ -515,7 +521,9 @@ export default function CameraModel({ progress, beat, photos, debug }: CameraMod
 
   return (
     <group ref={root}>
-      <primitive object={body.node} />
+      <group {...PLACEMENT.body}>
+        <primitive object={body.node} />
+      </group>
       {!(typeof window !== "undefined" && window.location.search.includes("nolens")) && (
         <group {...PLACEMENT.lens}>
           <primitive object={lens.node} />
@@ -575,6 +583,51 @@ export default function CameraModel({ progress, beat, photos, debug }: CameraMod
             <meshBasicMaterial color={k === "lensFront" ? "#ff4040" : "#40ff80"} />
           </mesh>
         ))}
+      {showHotspots && interactionMode === "normal" && (
+        <>
+          {/* Play Button Hotspot (View Gallery) */}
+          <group position={PLACEMENT.playButton.position}>
+            <Html center zIndexRange={[20, 0]}>
+              <div
+                className="cam-hotspot"
+                onClick={(e) => { e.stopPropagation(); onPlayClick?.(); }}
+              >
+                <div className="cam-hotspot-ring" />
+                <div className="cam-hotspot-dot" />
+                <div className="cam-hotspot-label">View Gallery</div>
+              </div>
+            </Html>
+          </group>
+
+          {/* Menu Button Hotspot */}
+          <group position={PLACEMENT.menuButton.position}>
+            <Html center zIndexRange={[20, 0]}>
+              <div
+                className="cam-hotspot"
+                onClick={(e) => { e.stopPropagation(); onMenuClick?.(); }}
+              >
+                <div className="cam-hotspot-ring" />
+                <div className="cam-hotspot-dot" />
+                <div className="cam-hotspot-label" style={{ left: 'auto', right: '32px' }}>Menu</div>
+              </div>
+            </Html>
+          </group>
+
+          {/* Shutter Button Hotspot (Shoot / Work With Me) */}
+          <group position={PLACEMENT.shutterButton.position}>
+            <Html center zIndexRange={[20, 0]}>
+              <div
+                className="cam-hotspot"
+                onClick={(e) => { e.stopPropagation(); onShutterClick?.(); }}
+              >
+                <div className="cam-hotspot-ring" />
+                <div className="cam-hotspot-dot" />
+                <div className="cam-hotspot-label">Work With Me</div>
+              </div>
+            </Html>
+          </group>
+        </>
+      )}
 
     </group>
   );
