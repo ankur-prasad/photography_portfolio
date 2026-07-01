@@ -96,6 +96,7 @@ function ViewfinderPhoto({
   }
   useEffect(() => {
     first.colorSpace = THREE.SRGBColorSpace;
+    first.needsUpdate = true;
     const loader = new THREE.TextureLoader();
     let cancelled = false;
     // priority order: the eye (last — it holds under the caption) before the
@@ -105,6 +106,7 @@ function ViewfinderPhoto({
       loader.load(photos[i], (t) => {
         if (cancelled) { t.dispose(); return; }
         t.colorSpace = THREE.SRGBColorSpace;
+        t.needsUpdate = true;
         texs.current[i] = t;
       });
     }
@@ -114,14 +116,11 @@ function ViewfinderPhoto({
   const mesh = useRef<THREE.Mesh>(null);
   const [boxW, boxH] = PLACEMENT.zoomTarget.scale;
   const boxAspect = boxW / boxH;
-  const mat = useMemo(
-    // toneMapped:false — the Canvas uses ACES tone mapping (for the 3D camera
-    // body lighting), which lifts + desaturates a photo's colours (deep blue
-    // water → washed-out cyan). The viewfinder photo should read 1:1 with the
-    // source JPEG, so opt it out of tone mapping.
-    () => new THREE.MeshBasicMaterial({ map: first, transparent: true, opacity: 0, side: THREE.DoubleSide, toneMapped: false }),
-    [first]
-  );
+  const mat = useMemo(() => {
+    first.colorSpace = THREE.SRGBColorSpace;
+    first.needsUpdate = true;
+    return new THREE.MeshBasicMaterial({ map: first, transparent: true, opacity: 0, side: THREE.DoubleSide, toneMapped: false });
+  }, [first]);
   const applied = useRef<THREE.Texture | null>(null);
   useFrame(() => {
     mat.opacity = opacityRef.current;
