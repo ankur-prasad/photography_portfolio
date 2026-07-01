@@ -116,45 +116,83 @@ function ViewfinderPhoto({
   const mesh = useRef<THREE.Mesh>(null);
   const [boxW, boxH] = PLACEMENT.zoomTarget.scale;
   const boxAspect = boxW / boxH;
+
   const mat = useMemo(() => {
     first.colorSpace = THREE.SRGBColorSpace;
     first.needsUpdate = true;
-    return new THREE.MeshBasicMaterial({ map: first, transparent: true, opacity: 0, side: THREE.DoubleSide, toneMapped: false });
+    
+    // Wave Shader Material
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        uMap: { value: first },
+        uOpacity: { value: 0 },
+        uTime: { value: 0 },
+        uIsWater: { value: 1.0 }, // 1.0 = animate water, 0.0 = static for other photos
+      },
+      vertexShader: `
+        uniform float uTime;
+        uniform float uIsWater;
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          vec3 pos = position;
+          if (uIsWater > 0.5) {
+            // Apply wave movement on Z coordinates
+            float wave1 = sin(pos.x * 6.0 + uTime * 1.5) * 0.035;
+            float wave2 = cos(pos.y * 5.0 + uTime * 1.2) * 0.025;
+            float wave3 = sin((pos.x + pos.y) * 4.0 + uTime * 0.8) * 0.02;
+            pos.z += wave1 + wave2 + wave3;
+          }
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D uMap;
+        uniform float uOpacity;
+        varying vec2 vUv;
+        void main() {
+          vec4 color = texture2D(uMap, vUv);
+          gl_FragColor = vec4(color.rgb, color.a * uOpacity);
+        }
+      `,
+      transparent: true,
+      side: THREE.DoubleSide,
+      toneMapped: false,
+    });
   }, [first]);
+
   const applied = useRef<THREE.Texture | null>(null);
-  useFrame(() => {
-    mat.opacity = opacityRef.current;
+  useFrame((state) => {
+    mat.uniforms.uOpacity.value = opacityRef.current;
+    
+    // Update shader time for fluid wave animation
+    mat.uniforms.uTime.value = state.clock.getElapsedTime();
+
     let i = Math.min(photos.length - 1, Math.max(0, Math.round(indexRef.current)));
-    // if the target frame hasn't streamed in yet, hold the most recent loaded
-    // frame at/below it rather than flashing blank; it upgrades automatically
-    // on a later frame once the texture arrives (we compare by texture object).
     while (i > 0 && !texs.current[i]) i--;
     const tex = texs.current[i] ?? first;
-    if (tex === applied.current) return;
-    applied.current = tex;
-    mat.map = tex;
-    mat.needsUpdate = true;
-    /* the wrapping <group {...PLACEMENT.zoomTarget}> applies a non-uniform
-       scale (the rectangle Ankur drew in AssetLab), which would otherwise
-       stretch the photo to that rectangle's aspect ratio. Counteract it by
-       scaling THIS unit plane (in the group's pre-scale local units) so that
-       once the group scale is applied, the photo "covers" the rectangle at its
-       own aspect ratio. Done per-swap since each frame has its own aspect. */
+    
+    // Animate wave only for the first water photo (index 0)
+    mat.uniforms.uIsWater.value = i === 0 ? 1.0 : 0.0;
+
+    if (tex !== applied.current) {
+      applied.current = tex;
+      mat.uniforms.uMap.value = tex;
+      mat.needsUpdate = true;
+    }
+
     const img = tex.image as HTMLImageElement;
-    const photoAspect = img.width / img.height;
-    const [worldW, worldH] = photoAspect > boxAspect ? [boxH * photoAspect, boxH] : [boxW, boxW / photoAspect];
-    mesh.current?.scale.set(worldW / boxW, worldH / boxH, 1);
+    if (img) {
+      const photoAspect = img.width / img.height;
+      const [worldW, worldH] = photoAspect > boxAspect ? [boxH * photoAspect, boxH] : [boxW, boxW / photoAspect];
+      mesh.current?.scale.set(worldW / boxW, worldH / boxH, 1);
+    }
   });
+
   return (
-    /* PLACEMENT.zoomTarget's rotation (hand-tuned in AssetLab, where the
-       debug rectangle was double-sided so this wasn't visible) leaves the
-       plane's front face pointing away from the viewing camera during the
-       whole viewfinder beat — verified numerically, not guessed. Flip 180°
-       so the camera sees the true front face (correct, unmirrored texture)
-       instead of relying on DoubleSide alone, which would render the back
-       face's mirrored UVs. */
     <mesh ref={mesh} material={mat} rotation={[0, Math.PI, 0]}>
-      <planeGeometry args={[1, 1]} />
+      {/* segment plane to give enough vertices for smooth wave displacement */}
+      <planeGeometry args={[1, 1, 64, 64]} />
     </mesh>
   );
 }
