@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html, useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
@@ -86,9 +86,27 @@ function ViewfinderPhoto({
   indexRef: React.MutableRefObject<number>;
   opacityRef: React.MutableRefObject<number>;
 }) {
-  // Suspend the canvas on ONLY the first frame (water) so first paint is fast;
-  // the rest of the 2560px set streams in afterwards. Loading the heavy set
-  // behind one big Suspense gate would stall the whole hero on ~8MB.
+  // Create video element for loopable moving waves
+  const [video] = useState(() => {
+    const v = document.createElement("video");
+    v.src = "/viewfinder/can_we_make_this_into_a_loopab.mp4";
+    v.loop = true;
+    v.muted = true;
+    v.playsInline = true;
+    v.crossOrigin = "anonymous";
+    v.play().catch(() => {});
+    return v;
+  });
+
+  const videoTex = useMemo(() => {
+    const vt = new THREE.VideoTexture(video);
+    vt.colorSpace = THREE.SRGBColorSpace;
+    vt.minFilter = THREE.LinearFilter;
+    vt.magFilter = THREE.LinearFilter;
+    return vt;
+  }, [video]);
+
+  // Load other frame textures for viewfinder flipbook advance (cycling frames)
   const first = useTexture(photos[0]) as THREE.Texture;
   const texs = useRef<(THREE.Texture | null)[]>([]);
   if (texs.current.length !== photos.length) {
@@ -99,8 +117,6 @@ function ViewfinderPhoto({
     first.needsUpdate = true;
     const loader = new THREE.TextureLoader();
     let cancelled = false;
-    // priority order: the eye (last — it holds under the caption) before the
-    // fast middle frames, so the lingering shots are guaranteed crisp first.
     const order = [photos.length - 1, ...photos.map((_, i) => i).filter((i) => i > 0 && i < photos.length - 1)];
     for (const i of order) {
       loader.load(photos[i], (t) => {
@@ -117,82 +133,61 @@ function ViewfinderPhoto({
   const [boxW, boxH] = PLACEMENT.zoomTarget.scale;
   const boxAspect = boxW / boxH;
 
+  // Render videoTexture on index 0, standard textures on other indices
   const mat = useMemo(() => {
-    first.colorSpace = THREE.SRGBColorSpace;
-    first.needsUpdate = true;
-    
-    // Wave Shader Material
-    return new THREE.ShaderMaterial({
-      uniforms: {
-        uMap: { value: first },
-        uOpacity: { value: 0 },
-        uTime: { value: 0 },
-        uIsWater: { value: 1.0 }, // 1.0 = animate water, 0.0 = static for other photos
-      },
-      vertexShader: `
-        uniform float uTime;
-        uniform float uIsWater;
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          vec3 pos = position;
-          if (uIsWater > 0.5) {
-            // Apply wave movement on Z coordinates
-            float wave1 = sin(pos.x * 6.0 + uTime * 1.5) * 0.035;
-            float wave2 = cos(pos.y * 5.0 + uTime * 1.2) * 0.025;
-            float wave3 = sin((pos.x + pos.y) * 4.0 + uTime * 0.8) * 0.02;
-            pos.z += wave1 + wave2 + wave3;
-          }
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D uMap;
-        uniform float uOpacity;
-        varying vec2 vUv;
-        void main() {
-          vec4 color = texture2D(uMap, vUv);
-          gl_FragColor = vec4(color.rgb, color.a * uOpacity);
-        }
-      `,
-      transparent: true,
-      side: THREE.DoubleSide,
-      toneMapped: false,
-    });
-  }, [first]);
+    return new THREE.MeshBasicMaterial({ map: videoTex, transparent: true, opacity: 0, side: THREE.DoubleSide, toneMapped: false });
+  }, [videoTex]);
 
   const applied = useRef<THREE.Texture | null>(null);
-  useFrame((state) => {
-    mat.uniforms.uOpacity.value = opacityRef.current;
+
+  useFrame(() => {
+    mat.opacity = opacityRef.current;
+    const idx = Math.round(indexRef.current);
     
-    // Update shader time for fluid wave animation
-    mat.uniforms.uTime.value = state.clock.getElapsedTime();
+    // index 0 gets video; subsequent indexes get standard flipbook frames
+    if (idx === 0) {
+      if (applied.current !== videoTex) {
+        applied.current = videoTex;
+        mat.map = videoTex;
+        mat.needsUpdate = true;
+        if (video.paused) {
+          video.play().catch(() => {});
+        }
+      }
+      mesh.current?.scale.set(1, 1, 1);
+    } else {
+      let i = Math.min(photos.length - 1, Math.max(0, idx));
+      while (i > 0 && !texs.current[i]) i--;
+      const tex = texs.current[i] ?? first;
+      if (tex !== applied.current) {
+        applied.current = tex;
+        mat.map = tex;
+        mat.needsUpdate = true;
+        // pause video when not visible to save CPU cycles
+        if (!video.paused) {
+          video.pause();
+        }
+      }
 
-    let i = Math.min(photos.length - 1, Math.max(0, Math.round(indexRef.current)));
-    while (i > 0 && !texs.current[i]) i--;
-    const tex = texs.current[i] ?? first;
-    
-    // Animate wave only for the first water photo (index 0)
-    mat.uniforms.uIsWater.value = i === 0 ? 1.0 : 0.0;
-
-    if (tex !== applied.current) {
-      applied.current = tex;
-      mat.uniforms.uMap.value = tex;
-      mat.needsUpdate = true;
-    }
-
-    const img = tex.image as HTMLImageElement;
-    if (img) {
-      const photoAspect = img.width / img.height;
-      const [worldW, worldH] = photoAspect > boxAspect ? [boxH * photoAspect, boxH] : [boxW, boxW / photoAspect];
-      mesh.current?.scale.set(worldW / boxW, worldH / boxH, 1);
+      const img = tex.image as HTMLImageElement;
+      if (img) {
+        const photoAspect = img.width / img.height;
+        const [worldW, worldH] = photoAspect > boxAspect ? [boxH * photoAspect, boxH] : [boxW, boxW / photoAspect];
+        mesh.current?.scale.set(worldW / boxW, worldH / boxH, 1);
+      }
     }
   });
 
   return (
+    /* PLACEMENT.zoomTarget's rotation (hand-tuned in AssetLab, where the
+       debug rectangle was double-sided so this wasn't visible) leaves the
+       plane's front face pointing away from the viewing camera during the
+       whole viewfinder beat — verified numerically, not guessed. Flip 180°
+       so the camera sees the true front face (correct, unmirrored texture)
+       instead of relying on DoubleSide alone, which would render the back
+       face's mirrored UVs. */
     <mesh ref={mesh} material={mat} rotation={[0, Math.PI, 0]}>
-      {/* segment plane to give enough vertices for smooth wave displacement */}
-      <planeGeometry args={[1, 1, 64, 64]} />
+      <planeGeometry args={[1, 1]} />
     </mesh>
   );
 }

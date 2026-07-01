@@ -1,8 +1,3 @@
-/* first frame of the viewfinder flipbook — water (Surface, ANK00641). Keep in
-   sync with VIEWFINDER_CYCLE[0] in CameraExperience so the static→3D upgrade
-   doesn't flash a different photo. */
-const POSTER_WEB = "/web/ANK00641.jpg";
-
 /**
  * Static first paint for the home hero, shown while the 3D camera chunk loads.
  * Mirrors the initial camera frame (viewfinder photo + hero copy) so the upgrade
@@ -11,7 +6,15 @@ const POSTER_WEB = "/web/ANK00641.jpg";
 export default function HeroPoster() {
   return (
     <section className="hero-poster">
-      <img className="hero-poster-img" src={POSTER_WEB} alt="" fetchPriority="high" />
+      <video
+        className="hero-poster-img"
+        src="/viewfinder/can_we_make_this_into_a_loopab.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
       <div className="camera-veil" />
       <div className="act-hero" style={{ opacity: 1 }}>
         <div className="container">
