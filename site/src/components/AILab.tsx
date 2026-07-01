@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import DepthScene from "./DepthScene";
 import { heroes } from "../data/photos";
+import { heroSource } from "../lib/media";
 
 const ANNOS = [
   { n: "01", label: "Neural depth map", x: 17, y: 34, side: "right" },
@@ -60,7 +61,7 @@ export default function AILab() {
           <div className="lab-stage-canvas">
             <DepthScene
               key={active.id}
-              photo={active.photo}
+              photo={heroSource(active)}
               depth={active.depth}
               strength={0.075}
               zoom={1.06}
@@ -122,7 +123,7 @@ export default function AILab() {
             transition={{ duration: 0.5 }}
           >
             <DepthScene
-              photo={active.photo}
+              photo={heroSource(active)}
               depth={active.depth}
               strength={0.14}
               zoom={1.22}
