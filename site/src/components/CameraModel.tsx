@@ -35,6 +35,26 @@ const BODY_URL = "/models/camera_body_split.glb?v=4";
 const LENS_URL = "/models/camera_lens.glb";
 useGLTF.preload(BODY_URL);
 useGLTF.preload(LENS_URL);
+useTexture.preload("/web/ANK00641.jpg");
+
+function LcdImage({ src, opacityRef }: { src: string; opacityRef: React.MutableRefObject<number> }) {
+  const tex = useTexture(src);
+  const mat = useMemo(() => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, toneMapped: false, side: THREE.DoubleSide });
+  }, [tex]);
+
+  useFrame(() => {
+    mat.opacity = opacityRef.current;
+  });
+
+  return (
+    <mesh position={[0, 0, 0.002]} rotation={[0, Math.PI, 0]}>
+      <planeGeometry />
+      <primitive object={mat} attach="material" />
+    </mesh>
+  );
+}
 
 /* ---- baked-lens-plug stencil (normalised model space, same frame as PLACEMENT/ANCHOR) ----
    A body triangle is "lens plug" if it sits within LENS_PLUG_R of the optical
@@ -271,6 +291,17 @@ function useMountedLens() {
             roughness: src.roughness,
             metalness: src.metalness,
           });
+          fresh.onBeforeCompile = (shader) => {
+            shader.fragmentShader = shader.fragmentShader.replace(
+              '#include <map_fragment>',
+              `
+              #include <map_fragment>
+              #ifdef USE_MAP
+                diffuseColor.a = (sampledDiffuseColor.a < 0.1) ? opacity : (sampledDiffuseColor.a * opacity);
+              #endif
+              `
+            );
+          };
           mats.add(fresh);
           return fresh;
         };
@@ -370,7 +401,17 @@ export default function CameraModel({
   const cur = useRef(0);
   const lastLog = useRef(0);
 
+  const bodyGroupRef = useRef<THREE.Group>(null);
+  const lensGroupRef = useRef<THREE.Group>(null);
+  const irisGroupRef = useRef<THREE.Group>(null);
+  const capCoverGroupRef = useRef<THREE.Group>(null);
+  const sensorGroupRef = useRef<THREE.Group>(null);
+  const shutterGroupRef = useRef<THREE.Group>(null);
+  const zoomTargetGroupRef = useRef<THREE.Group>(null);
+  const lcdScreenGroupRef = useRef<THREE.Group>(null);
+
   const viewfinderPhotoOpacity = useRef(1);
+  const lcdImageOpacity = useRef(0);
   const viewfinderIndex = useRef(0);
   const shutterOpen = useRef(0);
   const irisOpen = useRef(0.7);
@@ -408,8 +449,8 @@ export default function CameraModel({
        transparent=true permanently — as this used to do — makes those holes
        show through as "see through" patches even at full opacity. Only flip
        a material transparent for the brief window it's actually fading. */
-    const setFade = (mats: THREE.Material[], v: number) => {
-      const t = v < 1;
+    const setFade = (mats: THREE.Material[], v: number, forceTransparent = false) => {
+      const t = forceTransparent || v < 1;
       for (const m of mats) {
         m.opacity = v;
         // Toggling `transparent` at runtime REQUIRES needsUpdate — without it
@@ -474,7 +515,7 @@ export default function CameraModel({
     // wall, so dipping it for longer would make its SIDES translucent too,
     // exposing the iris/mount hardware from any side/¾ angle — not just the
     // dead-on front opening.
-    setFade(lens.mats, lensVis * (1 - lensGlassDip));
+    setFade(lens.mats, lensVis * (1 - lensGlassDip), true);
     // Belt-and-suspenders: when the lens is fully off, hide the whole node
     // outright. Opacity 0 alone proved unreliable for the clean lens (the
     // transparent-flip-without-recompile bug above made it flash back to
@@ -510,9 +551,76 @@ export default function CameraModel({
     // the lens beat takes over. It also flips through the act-opening flipbook
     // (water → … → eye) and lands/holds on the eye at EYE_LAND_P.
     viewfinderPhotoOpacity.current = 1 - smoothstep(0.16, 0.24, p);
-    viewfinderIndex.current = viewfinderIndexFor(p, photos.length);
+    lcdImageOpacity.current = smoothstep(0.70, 0.74, p) * (1 - smoothstep(0.92, 0.95, p));
+    if (p >= 0.10909) {
+      const scrollRange = p - 0.10909;
+      const rate = 120; // cycle through photos based on scroll progress rate
+      viewfinderIndex.current = ((photos.length - 1) + Math.floor(scrollRange * rate)) % photos.length;
+    } else {
+      viewfinderIndex.current = viewfinderIndexFor(p, photos.length);
+    }
     shutterOpen.current = shutterOpenFor(p);
     irisOpen.current = irisOpenFor(p);
+
+    // Exploded view offsets at the scroll end (0.93 -> 1.0)
+    const explodeT = smoothstep(0.93, 1.0, p);
+    
+    if (bodyGroupRef.current) {
+      bodyGroupRef.current.position.set(
+        PLACEMENT.body.position[0],
+        PLACEMENT.body.position[1],
+        PLACEMENT.body.position[2] - 0.4 * explodeT
+      );
+    }
+    if (lensGroupRef.current) {
+      lensGroupRef.current.position.set(
+        PLACEMENT.lens.position[0],
+        PLACEMENT.lens.position[1],
+        PLACEMENT.lens.position[2] + 1.8 * explodeT
+      );
+    }
+    if (irisGroupRef.current) {
+      irisGroupRef.current.position.set(
+        PLACEMENT.iris.position[0],
+        PLACEMENT.iris.position[1],
+        PLACEMENT.iris.position[2] + 1.0 * explodeT
+      );
+    }
+    if (capCoverGroupRef.current) {
+      capCoverGroupRef.current.position.set(
+        PLACEMENT.capCover.position[0],
+        PLACEMENT.capCover.position[1],
+        PLACEMENT.capCover.position[2] + 0.4 * explodeT
+      );
+    }
+    if (sensorGroupRef.current) {
+      sensorGroupRef.current.position.set(
+        PLACEMENT.sensor.position[0],
+        PLACEMENT.sensor.position[1],
+        PLACEMENT.sensor.position[2] + 0.1 * explodeT
+      );
+    }
+    if (shutterGroupRef.current) {
+      shutterGroupRef.current.position.set(
+        PLACEMENT.shutter.position[0],
+        PLACEMENT.shutter.position[1],
+        PLACEMENT.shutter.position[2] + 0.25 * explodeT
+      );
+    }
+    if (zoomTargetGroupRef.current) {
+      zoomTargetGroupRef.current.position.set(
+        PLACEMENT.zoomTarget.position[0],
+        PLACEMENT.zoomTarget.position[1],
+        PLACEMENT.zoomTarget.position[2] - 0.4 * explodeT
+      );
+    }
+    if (lcdScreenGroupRef.current) {
+      lcdScreenGroupRef.current.position.set(
+        PLACEMENT.lcdScreen.position[0],
+        PLACEMENT.lcdScreen.position[1],
+        PLACEMENT.lcdScreen.position[2] - 0.4 * explodeT
+      );
+    }
 
     if (root.current) root.current.rotation.y = Math.sin(p * 0.5) * 0.012;
   });
@@ -521,11 +629,11 @@ export default function CameraModel({
 
   return (
     <group ref={root}>
-      <group {...PLACEMENT.body}>
+      <group ref={bodyGroupRef} position={PLACEMENT.body.position} rotation={PLACEMENT.body.rotation} scale={PLACEMENT.body.scale}>
         <primitive object={body.node} />
       </group>
       {!(typeof window !== "undefined" && window.location.search.includes("nolens")) && (
-        <group {...PLACEMENT.lens}>
+        <group ref={lensGroupRef} position={PLACEMENT.lens.position} rotation={PLACEMENT.lens.rotation} scale={PLACEMENT.lens.scale}>
           <primitive object={lens.node} />
           <mesh material={M.frontGlass} position={[0, 0, 0.522]}>
             <circleGeometry args={[0.36, 48]} />
@@ -534,7 +642,7 @@ export default function CameraModel({
       )}
 
       {/* lens interior — glow + iris, sitting inside the lens (behind the front glass) */}
-      <group {...PLACEMENT.iris}>
+      <group ref={irisGroupRef} position={PLACEMENT.iris.position} rotation={PLACEMENT.iris.rotation} scale={PLACEMENT.iris.scale}>
         <mesh material={M.irisGlow} position={[0, 0, -0.18]}>
           <circleGeometry args={[0.2, 40]} />
         </mesh>
@@ -542,7 +650,7 @@ export default function CameraModel({
       </group>
 
       {/* dark plate that hides the body cap and fills the mount opening */}
-      <group {...PLACEMENT.capCover}>
+      <group ref={capCoverGroupRef} position={PLACEMENT.capCover.position} rotation={PLACEMENT.capCover.rotation} scale={PLACEMENT.capCover.scale}>
         <mesh material={M.cap}>
           <circleGeometry args={[0.54, 56]} />
         </mesh>
@@ -553,7 +661,7 @@ export default function CameraModel({
       </group>
 
       {/* the built full-frame sensor — cyan cover-glass rim + purple silicon */}
-      <group {...PLACEMENT.sensor}>
+      <group ref={sensorGroupRef} position={PLACEMENT.sensor.position} rotation={PLACEMENT.sensor.rotation} scale={PLACEMENT.sensor.scale}>
         <mesh material={M.sensorRim}>
           <planeGeometry args={[0.7, 0.47]} />
         </mesh>
@@ -563,13 +671,18 @@ export default function CameraModel({
       </group>
 
       {/* focal-plane shutter, just in front of the sensor */}
-      <group {...PLACEMENT.shutter}>
+      <group ref={shutterGroupRef} position={PLACEMENT.shutter.position} rotation={PLACEMENT.shutter.rotation} scale={PLACEMENT.shutter.scale}>
         <ShutterMech slatMat={M.shutterSlat} openRef={shutterOpen} />
       </group>
 
       {/* the hero photo, pinned to the viewfinder eyepiece */}
-      <group {...PLACEMENT.zoomTarget}>
+      <group ref={zoomTargetGroupRef} position={PLACEMENT.zoomTarget.position} rotation={PLACEMENT.zoomTarget.rotation} scale={PLACEMENT.zoomTarget.scale}>
         <ViewfinderPhoto photos={photos} indexRef={viewfinderIndex} opacityRef={viewfinderPhotoOpacity} />
+      </group>
+
+      {/* the LCD screen image, visible when rotating/zooming to the screen */}
+      <group ref={lcdScreenGroupRef} position={PLACEMENT.lcdScreen.position} rotation={PLACEMENT.lcdScreen.rotation} scale={PLACEMENT.lcdScreen.scale}>
+        <LcdImage src="/web/ANK00641.jpg" opacityRef={lcdImageOpacity} />
       </group>
 
       {PARTS.map((part) => (
@@ -594,7 +707,7 @@ export default function CameraModel({
               >
                 <div className="cam-hotspot-ring" />
                 <div className="cam-hotspot-dot" />
-                <div className="cam-hotspot-label">View Gallery</div>
+                <div className="cam-hotspot-label label-below">View Gallery</div>
               </div>
             </Html>
           </group>
@@ -608,7 +721,7 @@ export default function CameraModel({
               >
                 <div className="cam-hotspot-ring" />
                 <div className="cam-hotspot-dot" />
-                <div className="cam-hotspot-label" style={{ left: 'auto', right: '32px' }}>Menu</div>
+                <div className="cam-hotspot-label label-below">Menu</div>
               </div>
             </Html>
           </group>
@@ -622,7 +735,7 @@ export default function CameraModel({
               >
                 <div className="cam-hotspot-ring" />
                 <div className="cam-hotspot-dot" />
-                <div className="cam-hotspot-label">Work With Me</div>
+                <div className="cam-hotspot-label label-above">Work With Me</div>
               </div>
             </Html>
           </group>

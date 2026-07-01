@@ -1,12 +1,14 @@
 import { Suspense, useEffect, useRef, useState, useContext } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useTransform, useScroll } from "framer-motion";
 import * as THREE from "three";
 import { Link } from "react-router-dom";
 import CameraModel from "./CameraModel";
 import Gallery from "./Gallery";
 import Inquiry from "./Inquiry";
+import Footer from "./Footer";
+import FavoritesGallery from "./FavoritesGallery";
 import { PARTS, beatFor, clamp01, samplePose, PLACEMENT } from "../data/cameraScript";
 import { LenisContext } from "../lib/LenisContext";
 
@@ -99,21 +101,27 @@ function CameraRig({
    caption-free "pause" window — and hands off to beat 1's "PART 01 / 06
    VIEWFINDER" card exactly at frame 200 (p 0.10909, also beatFor's threshold)
    so the two captions never overlap. */
-function phaseFor(p: number): "hero" | "pause" | "reveal" | "parts" | "thesis" | "handoff" {
+function phaseFor(p: number): "hero" | "pause" | "reveal" | "parts" | "thesis" | "favorites" | "exploded" {
   if (p < 0.04092) return "hero";
   if (p < 0.04692) return "pause";
   if (p < 0.10909) return "reveal";
-  if (p < 0.93) return "parts";
-  if (p < 0.97) return "thesis";
-  return "handoff";
+  if (p < 0.70) return "parts";
+  if (p < 0.75) return "thesis";
+  if (p < 0.92) return "favorites";
+  return "exploded";
 }
 
 export default function CameraExperience() {
   const section = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: section,
+    offset: ["start start", "end end"],
+  });
   const progress = useRef(0);
   const [beat, setBeat] = useState(0);
   const [phase, setPhase] = useState<ReturnType<typeof phaseFor>>("hero");
   const [interactionMode, setInteractionMode] = useState<"normal" | "zoomed-gallery" | "contact" | "menu">("normal");
+  const [activeOverlay, setActiveOverlay] = useState<"none" | "favorites" | "footer">("none");
   const [shutterFlash, setShutterFlash] = useState(false);
   const lenis = useContext(LenisContext);
 
@@ -132,6 +140,17 @@ export default function CameraExperience() {
       const b = beatFor(p);
       setBeat((prev) => (prev === b ? prev : b));
       setPhase((prev) => { const ph = phaseFor(p); return prev === ph ? prev : ph; });
+
+      // Determine active overlay from scroll progress
+      setActiveOverlay((prev) => {
+        let next: "none" | "favorites" | "footer" = "none";
+        if (p >= 0.80 && p < 0.92) {
+          next = "favorites";
+        } else if (p >= 0.92) {
+          next = "footer";
+        }
+        return prev === next ? prev : next;
+      });
     };
     const onScroll = () => {
       if (queued) return;
@@ -230,6 +249,12 @@ export default function CameraExperience() {
     }, 150);
   };
 
+  const lcdOpacity = useTransform(scrollYProgress, [0.80, 0.82, 0.90, 0.92], [0, 1, 1, 0]);
+  const lcdScale = useTransform(scrollYProgress, [0.80, 0.82, 0.90, 0.92], [0.95, 1, 1, 0.95]);
+
+  const footerOpacity = useTransform(scrollYProgress, [0.92, 0.95], [0, 1]);
+  const footerTranslateY = useTransform(scrollYProgress, [0.93, 1.00], ["0%", "-40%"]);
+
   return (
     <section className="camera-act" ref={section}>
       <div className="camera-stage">
@@ -262,7 +287,7 @@ export default function CameraExperience() {
                 photos={VIEWFINDER_CYCLE} 
                 debug={DEBUG}
                 interactionMode={interactionMode}
-                showHotspots={phase === "handoff"}
+                showHotspots={false}
                 onPlayClick={() => setInteractionMode("zoomed-gallery")}
                 onMenuClick={() => setInteractionMode("menu")}
                 onShutterClick={handleShutterClick}
@@ -292,34 +317,35 @@ export default function CameraExperience() {
           className="act-thesis"
           style={{ opacity: phase === "reveal" ? 1 : 0, transition: "opacity 0.6s", pointerEvents: "none" }}
         >
-          {phase === "reveal" && (
-            <p className="long">
-              A camera mimics the eye. The only difference —{" "}
-              <span className="accent">the eye sees what the brain decides to notice</span>. A camera sees what you
-              point it at.
-            </p>
-          )}
+          <p className="long">
+            A camera mimics the eye. The only difference —{" "}
+            <span className="accent">the eye sees what the brain decides to notice</span>. A camera sees what you
+            point it at.
+          </p>
         </div>
 
         {/* ---------- per-part narration ---------- */}
-        <AnimatePresence mode="wait">
-          {part && interactionMode === "normal" && (
-            <motion.div
-              key={part.no}
-              className={`act-copy ${part.side}`}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <p className="eyebrow">PART {part.no} / 06</p>
-              <h3>
-                {part.name}
-                <small>↳ {part.eye}</small>
-              </h3>
-              <p>{part.body}</p>
-            </motion.div>
-          )}
+        <AnimatePresence>
+          {PARTS.map((p) => {
+            const active = part?.no === p.no && interactionMode === "normal";
+            return active ? (
+              <motion.div
+                key={p.no}
+                className={`act-copy ${p.side}`}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <p className="eyebrow">PART {p.no} / 06</p>
+                <h3>
+                  {p.name}
+                  <small>↳ {p.eye}</small>
+                </h3>
+                <p>{p.body}</p>
+              </motion.div>
+            ) : null;
+          })}
         </AnimatePresence>
 
         {/* ---------- thesis ---------- */}
@@ -481,6 +507,34 @@ export default function CameraExperience() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ---------- scroll-linked favorites zoom overlay ---------- */}
+        <motion.div
+          className="lcd-zoom-overlay"
+          style={{
+            opacity: lcdOpacity,
+            scale: lcdScale,
+            pointerEvents: activeOverlay === "favorites" ? "auto" : "none",
+          }}
+        >
+          <FavoritesGallery scrollYProgress={scrollYProgress} />
+        </motion.div>
+
+        {/* ---------- footer/contact exploded view overlay ---------- */}
+        <motion.div
+          className="exploded-footer-overlay"
+          style={{
+            opacity: footerOpacity,
+            pointerEvents: activeOverlay === "footer" ? "auto" : "none",
+          }}
+        >
+          <motion.div
+            className="exploded-footer-content"
+            style={{ y: footerTranslateY }}
+          >
+            <Footer />
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

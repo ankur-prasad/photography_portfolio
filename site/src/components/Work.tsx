@@ -4,13 +4,27 @@ import { galleries, pillars as PILLARS } from "../data/photos";
 import WorksIndex from "./WorksIndex";
 import Photo from "./Photo";
 import Lightbox from "./Lightbox";
+import ExpandedMask from "./ExpandedMask";
 
 export default function Work() {
   const [open, setOpen] = useState<string | null>(null);
   const [view, setView] = useState<"grid" | "index">("grid");
 
+  const handlePillarClick = (pillarKey: string) => {
+    setView("grid");
+    // Wait briefly for view switch to complete, then scroll
+    setTimeout(() => {
+      const el = document.getElementById(`pillar-${pillarKey}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
+  };
+
   return (
     <section className="work" id="work">
+      <ExpandedMask onPillarClick={handlePillarClick} />
+
       <div className="container">
         <div className="work-toggle">
           <span className="work-toggle-label">Selected work</span>
@@ -36,7 +50,7 @@ export default function Work() {
 
         {view === "grid" &&
           PILLARS.map((p) => (
-          <article className="pillar" key={p.key}>
+          <article className="pillar" id={`pillar-${p.key}`} key={p.key}>
             <motion.div
               className="pillar-head"
               initial={{ opacity: 0, y: 30 }}

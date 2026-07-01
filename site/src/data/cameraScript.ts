@@ -53,7 +53,7 @@ export const PLACEMENT: Record<string, { position: Vec3; rotation: Vec3; scale: 
      export. The photo itself is rendered here directly (CameraModel's
      ViewfinderPhoto), not approximated by a separate DOM layer. */
   zoomTarget: { position: [0.211, 0.445, -0.926], rotation: [0, 0, 0], scale: [0.25, 0.181, 1.389] },
-  lcdScreen: { position: [0.284, -0.283, -0.903], rotation: [-0.01, -0.002, 0], scale: [1.09, 0.813, 1.277] },
+  lcdScreen: { position: [0.284, -0.283, -0.910], rotation: [-0.01, -0.002, 0], scale: [1.09, 0.813, 1.277] },
   playButton: { position: [-0.493, -0.616, -0.930], rotation: [0, 0, 0], scale: [1, 1, 1] },
   menuButton: { position: [0.590, 0.280, -0.942], rotation: [0, 0, 0], scale: [1.84, 0.865, 1] },
   shutterButton: { position: [-0.671, 0.465, -0.121], rotation: [0, 0, 0], scale: [2.427, 2.427, 2.427] },
@@ -70,8 +70,8 @@ export const ANCHOR: Record<string, Vec3> = {
   evf: PLACEMENT.zoomTarget.position, // viewfinder hump — same point the photo actually lives at, so the "01 VIEWFINDER" label's leader-line points at it, not a separate guess
   lensMid: [0.417, -0.03, 0.623], // middle of the lens barrel (seated centre ≈ 1.08)
   lensFront: [-0.105, -0.03, 1.009], // front element / iris (front glass ≈ 1.61)
-  mount: [0.438, -0.03, 0.7], // open lens-mount plane — shutter + sensor live here
-  sensor: [-0.02, -0.03, 0.7], // built sensor, seated in the open mount
+  mount: [0.35, -0.109, 0.02], // open lens-mount plane — shutter + sensor live here
+  sensor: [0.05, -0.109, 0.01], // built sensor, seated in the open mount
   body: [-0.139, 0.04, -0.389], // body core — processor
 };
 
@@ -118,16 +118,18 @@ export const PARTS: Part[] = [
 
 /* ---- beat boundaries (scroll progress → current beat) ----
    0 hero · 1 viewfinder · 2 lens · 3 aperture · 4 shutter · 5 sensor ·
-   6 processor · 7 thesis/handoff */
+   6 processor · 7 thesis/handoff · 8 favorites (lcd zoom) · 9 exploded/footer */
 export function beatFor(p: number): number {
   if (p < 0.10909) return 0;
-  if (p < 0.2) return 1;
-  if (p < 0.36) return 2;
-  if (p < 0.52) return 3;
-  if (p < 0.66) return 4;
-  if (p < 0.8) return 5;
-  if (p < 0.93) return 6;
-  return 7;
+  if (p < 0.21) return 1;
+  if (p < 0.31) return 2;
+  if (p < 0.41) return 3;
+  if (p < 0.51) return 4;
+  if (p < 0.60) return 5;
+  if (p < 0.70) return 6;
+  if (p < 0.75) return 7;
+  if (p < 0.90) return 8;
+  return 9;
 }
 
 /* ---- viewfinder flipbook (the photo cycling as the act opens) ----
@@ -153,20 +155,20 @@ export function viewfinderIndexFor(p: number, count: number): number {
    off" so the open mount + sensor read (shutter, sensor, processor beats),
    and re-mounts for the closing settle. */
 export function lensVisFor(p: number): number {
-  const off = smoothstep(0.5, 0.57, p); // detaches after the aperture beat
-  const on = smoothstep(0.8, 0.87, p); // re-mounts right after the sensor beat
+  const off = smoothstep(0.41, 0.45, p); // detaches after the aperture beat
+  const on = smoothstep(0.68, 0.73, p);  // re-mounts right after the sensor beat
   return 1 - off + on;
 }
 
 /* the built mount interior (cap-cover + sensor well) is shown while the lens
    is off */
 export function mountOpenFor(p: number): number {
-  return smoothstep(0.5, 0.57, p) * (1 - smoothstep(0.8, 0.86, p));
+  return smoothstep(0.41, 0.45, p) * (1 - smoothstep(0.68, 0.73, p));
 }
 
 /* the purple sensor fades in for its own beat */
 export function sensorVisFor(p: number): number {
-  return smoothstep(0.64, 0.7, p) * (1 - smoothstep(0.84, 0.89, p));
+  return smoothstep(0.51, 0.54, p) * (1 - smoothstep(0.68, 0.73, p));
 }
 
 /* shutter curtain: present for the shutter beat, and stays parked (open, at
@@ -175,19 +177,19 @@ export function sensorVisFor(p: number): number {
    top/bottom of the sensor cutout. Clears right after the sensor beat, when
    the lens re-mounts and hides the mount opening anyway. */
 export function shutterVisFor(p: number): number {
-  return smoothstep(0.52, 0.57, p) * (1 - smoothstep(0.8, 0.86, p));
+  return smoothstep(0.41, 0.45, p) * (1 - smoothstep(0.68, 0.73, p));
 }
 
 /* shutter open amount: closed at the start of the shutter beat, opens and
    stays open to reveal the sensor */
 export function shutterOpenFor(p: number): number {
-  return smoothstep(0.58, 0.65, p);
+  return smoothstep(0.43, 0.48, p);
 }
 
 /* iris (inside the lens) reacts like a pupil across the aperture beat */
 export function irisOpenFor(p: number): number {
-  const narrow = smoothstep(0.38, 0.45, p) * (1 - smoothstep(0.48, 0.54, p));
-  return 0.72 - narrow * 0.42;
+  const narrow = smoothstep(0.32, 0.35, p) * (1 - smoothstep(0.38, 0.41, p));
+  return 1.0 - narrow * 0.85;
 }
 
 /* dip the BARREL/GLASS (the real scanned lens.mats — i.e. the tube walls,
@@ -199,7 +201,7 @@ export function irisOpenFor(p: number): number {
    not just the front opening. Unchanged from the original aperture-beat
    reveal (Ankur: keep this behaviour as-is, aperture through sensor). */
 export function lensGlassDipFor(p: number): number {
-  return smoothstep(0.38, 0.45, p) * (1 - smoothstep(0.48, 0.54, p));
+  return smoothstep(0.32, 0.35, p) * (1 - smoothstep(0.38, 0.41, p));
 }
 
 /* the front cap disc (CameraModel's M.frontGlass) is a thin, dedicated disc
@@ -225,23 +227,19 @@ export interface Shot {
   dist: number;
 }
 export const SHOTS: Shot[] = [
-  /* on the viewfinder photo itself — true zoom-out starts here, not on a
-     different anchor the camera "happens to be near". dir is close to the
-     plane's actual front-face normal (verified numerically: [0.264, 0, -0.965]
-     after CameraModel's ViewfinderPhoto 180° flip) so the photo reads
-     straight-on rather than skewed. dist=0.15 (~104–123% overscan) opens
-     FULL-BLEED/zoomed — Ankur wants the hero photo filling the frame at the
-     open (reverted from the fit-to-frame dist=0.24 experiment), then the
-     zoom-out reveals it was a tiny viewfinder the whole time. Verified against
-     a 3:2 hero (water ANK00641 is 3936×2624). Tune by eye against the window. */
+  /* on the viewfinder photo itself — true zoom-out starts here */
   { p: 0.0, focus: PLACEMENT.zoomTarget.position, dir: [0.004, 0.05, -0.965], dist: 0.15 },
-  { p: 0.12, focus: "body", dir: [0.384, 0.311, -0.869], dist: 4.235 }, // pull way back — whole camera, viewfinder revealed
-  { p: 0.27, focus: "lensMid", dir: [0.92, 0.32, 0.55], dist: 3.7 }, // side-3/4 so the barrel + markings read
-  { p: 0.42, focus: [0.202, -0.127, 0.5], dir: [0.016, 0.048, 0.993], dist: 3.858 }, // dead-on into the front element (iris)
-  { p: 0.58, focus: [0.207, -0.118, 0.58], dir: [0.018, 0.046, 0.998], dist: 2.568 }, // lens off — dead-on into the open mount (shutter)
-  { p: 0.72, focus: [0.21, -0.114, 0.705], dir: [0.016, 0.037, 0.99], dist: 1.172 }, // dead-on into the mount — the sensor
-  { p: 0.87, focus: "body", dir: [-0.77, 0.267, 0.58], dist: 4.866 }, // processor — whole body, 3/4
-  { p: 0.97, focus: "body", dir: [-0.003, 0.258, -0.966], dist: 3.398 }, // settle on a clean 3/4 (lens back on)
+  { p: 0.12, focus: "body", dir: [0.384, 0.311, -0.869], dist: 4.235 }, // pull way back — whole camera
+  { p: 0.23, focus: "lensMid", dir: [0.92, 0.32, 0.55], dist: 3.7 }, // side-3/4
+  { p: 0.35, focus: [0.202, -0.127, 0.5], dir: [0.016, 0.048, 0.993], dist: 3.858 }, // front element (iris)
+  { p: 0.48, focus: [0.207, -0.118, 0.58], dir: [0.018, 0.046, 0.998], dist: 2.568 }, // open mount (shutter)
+  { p: 0.60, focus: [0.21, -0.114, 0.705], dir: [0.016, 0.037, 0.99], dist: 1.172 }, // the sensor
+  { p: 0.70, focus: "body", dir: [-0.77, 0.267, 0.58], dist: 4.866 }, // processor — whole body, 3/4
+  { p: 0.75, focus: "body", dir: [-0.003, 0.258, -0.966], dist: 2.8 }, // settle on back looking at screen
+  { p: 0.80, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // zoom into LCD screen
+  { p: 0.90, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // hold zoomed in during favorites
+  { p: 0.93, focus: "body", dir: [0, 0.3, -1], dist: 2.2 }, // zoom out from LCD screen
+  { p: 1.00, focus: "body", dir: [0.0, 0.98, -0.2], dist: 3.2 }, // top view of exploded assets
 ];
 
 /* ---- math helpers (shared) ---- */

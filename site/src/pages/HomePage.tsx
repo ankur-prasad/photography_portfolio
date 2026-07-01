@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react";
-import Footer from "../components/Footer";
 import HeroPoster from "../components/HeroPoster";
 import { usePageTitle } from "../lib/usePageTitle";
 
@@ -15,7 +14,6 @@ export default function HomePage() {
       <Suspense fallback={<HeroPoster />}>
         <CameraExperience />
       </Suspense>
-      <Footer />
     </main>
   );
 }

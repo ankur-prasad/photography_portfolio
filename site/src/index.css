@@ -391,7 +391,7 @@ button {
    ============================================================ */
 .camera-act {
   position: relative;
-  height: 980vh;          /* scroll length that scrubs the 3D timeline */
+  height: 1200vh;          /* scroll length that scrubs the 3D timeline */
 }
 .camera-stage {
   position: sticky;
@@ -1794,6 +1794,18 @@ button {
   border-color: var(--accent);
   background: rgba(8, 8, 10, 0.9);
 }
+.cam-hotspot-label.label-below {
+  left: 50%;
+  right: auto;
+  top: 34px;
+  transform: translateX(-50%);
+}
+.cam-hotspot-label.label-above {
+  left: 50%;
+  right: auto;
+  bottom: 34px;
+  transform: translateX(-50%);
+}
 
 @keyframes hotspot-pulse {
   0% { transform: scale(0.7); opacity: 0.85; }
@@ -1960,5 +1972,255 @@ button {
     max-width: 100%;
     border-right: none;
   }
+}
+
+/* ============================================================
+   EXPANDED MASK HERO (Work page landing)
+   ============================================================ */
+.expanded-mask-container {
+  width: 100%;
+  height: 100svh;
+  background: #08080a;
+  padding: 6px;
+  overflow: hidden;
+}
+.expanded-mask {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 4px;
+}
+.expanded-mask-container.desktop .expanded-mask {
+  flex-direction: row;
+}
+.expanded-mask-container.mobile .expanded-mask {
+  flex-direction: column;
+}
+.expanded-mask__panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.expanded-mask-container.mobile .expanded-mask__panel {
+  height: auto;
+  min-height: 80px;
+}
+.expanded-mask__panel-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+  filter: grayscale(0.2) contrast(1.1);
+}
+.expanded-mask__panel:hover .expanded-mask__panel-bg {
+  transform: scale(1.03);
+}
+.expanded-mask__panel.expanded:hover .expanded-mask__panel-bg {
+  transform: scale(1);
+}
+.expanded-mask__panel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(8, 8, 10, 0.95) 0%, rgba(8, 8, 10, 0.4) 50%, transparent 90%);
+  z-index: 2;
+  pointer-events: none;
+}
+.expanded-mask__panel.collapsed .expanded-mask__panel-overlay {
+  background: rgba(8, 8, 10, 0.55);
+  transition: background-color 0.3s ease;
+}
+.expanded-mask__panel.collapsed:hover .expanded-mask__panel-overlay {
+  background: rgba(8, 8, 10, 0.35);
+}
+.expanded-mask__panel-content {
+  position: relative;
+  z-index: 3;
+  padding: clamp(16px, 3.5vw, 40px);
+}
+.expanded-mask-container.mobile .expanded-mask__panel.collapsed .expanded-mask__panel-content {
+  padding: 16px 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.expanded-mask__panel-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.expanded-mask__panel-no {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.expanded-mask__panel-title {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 3.5vw, 54px);
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--fg);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+.expanded-mask__panel-details {
+  margin-top: 16px;
+  max-width: 480px;
+}
+.expanded-mask__panel-blurb {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 22px;
+}
+.expanded-mask__panel-link {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--fg);
+  padding: 8px 22px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.expanded-mask__panel-link span {
+  transition: transform 0.3s ease;
+}
+.expanded-mask__panel-link:hover {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+.expanded-mask__panel-link:hover span {
+  transform: translateX(4px);
+}
+.expanded-mask__panel-vertical-title {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%) rotate(90deg);
+  transform-origin: center center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.85;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  z-index: 3;
+}
+.expanded-mask__panel-vertical-title .no {
+  color: var(--accent);
+}
+.expanded-mask__panel-vertical-title .title {
+  letter-spacing: 0.18em;
+}
+
+/* ============================================================
+   PARALLAX IMAGE & MASONRY GRID
+   ============================================================ */
+.parallax-image {
+  will-change: transform;
+}
+.masonry-grid {
+  width: 100%;
+}
+.masonry-grid__column {
+  will-change: transform;
+}
+
+/* ============================================================
+   FAVORITES GALLERY
+   ============================================================ */
+.lcd-zoom-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: #08080a;
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+.favorites-gallery-scroll-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+.favorites-gallery {
+  position: relative;
+  width: 100%;
+  background: #08080a;
+  padding: clamp(60px, 12vh, 140px) clamp(20px, 5vw, 64px) clamp(120px, 20vh, 280px);
+}
+.favorites-gallery__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.favorites-gallery__header {
+  margin-bottom: clamp(40px, 8vh, 80px);
+  text-align: left;
+}
+.favorites-gallery__header .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 14px;
+}
+.favorites-gallery__header .favorites-gallery__title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 5.5vw, 72px);
+  font-weight: 400;
+  line-height: 1.08;
+  color: var(--fg);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+/* ============================================================
+   EXPLODED VIEW FOOTER OVERLAY
+   ============================================================ */
+.exploded-footer-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  background: radial-gradient(circle at center, transparent 35%, rgba(8, 8, 10, 0.85) 100%);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  will-change: opacity;
+}
+.exploded-footer-content {
+  position: relative;
+  width: 100%;
+  will-change: transform;
+}
+/* Ensure footer text is highly readable over the 3D canvas background */
+.exploded-footer-overlay .inquiry,
+.exploded-footer-overlay .footer {
+  background: transparent !important;
+  border-top: none !important;
+}
+.exploded-footer-overlay .footer {
+  padding-top: 40px;
 }
 
