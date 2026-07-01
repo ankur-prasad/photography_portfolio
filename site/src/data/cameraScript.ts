@@ -235,11 +235,12 @@ export const SHOTS: Shot[] = [
   { p: 0.48, focus: [0.207, -0.118, 0.58], dir: [0.018, 0.046, 0.998], dist: 2.568 }, // open mount (shutter)
   { p: 0.60, focus: [0.21, -0.114, 0.705], dir: [0.016, 0.037, 0.99], dist: 1.172 }, // the sensor
   { p: 0.70, focus: "body", dir: [-0.77, 0.267, 0.58], dist: 4.866 }, // processor — whole body, 3/4
-  { p: 0.75, focus: "body", dir: [-0.003, 0.258, -0.966], dist: 2.8 }, // settle on back looking at screen
-  { p: 0.80, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // zoom into LCD screen
+  { p: 0.74, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // settle on back, looking straight at LCD screen
+  { p: 0.78, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // hold pulled back looking straight at screen
+  { p: 0.82, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // zoom into LCD screen
   { p: 0.90, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // hold zoomed in during favorites
-  { p: 0.93, focus: "body", dir: [0, 0.3, -1], dist: 2.2 }, // zoom out from LCD screen
-  { p: 1.00, focus: "body", dir: [0.0, 0.98, -0.2], dist: 3.2 }, // top view of exploded assets
+  { p: 0.93, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // zoom out straight from LCD screen
+  { p: 1.00, focus: [0.1, -0.1, 0.0], dir: [0.0, 0.98, -0.2], dist: 3.8 }, // top view of fully-assembled camera
 ];
 
 /* ---- math helpers (shared) ---- */

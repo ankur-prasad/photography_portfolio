@@ -1,9 +1,9 @@
 import { Suspense, useEffect, useRef, useState, useContext } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
-import { AnimatePresence, motion, useTransform, useScroll } from "framer-motion";
+import { AnimatePresence, motion, useTransform, useScroll, useMotionValue } from "framer-motion";
 import * as THREE from "three";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CameraModel from "./CameraModel";
 import Gallery from "./Gallery";
 import Inquiry from "./Inquiry";
@@ -106,22 +106,25 @@ function phaseFor(p: number): "hero" | "pause" | "reveal" | "parts" | "thesis" |
   if (p < 0.04692) return "pause";
   if (p < 0.10909) return "reveal";
   if (p < 0.70) return "parts";
-  if (p < 0.75) return "thesis";
+  if (p < 0.78) return "thesis";
   if (p < 0.92) return "favorites";
   return "exploded";
 }
 
 export default function CameraExperience() {
+  const navigate = useNavigate();
   const section = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
+  useScroll({
     target: section,
     offset: ["start start", "end end"],
   });
   const progress = useRef(0);
+  const scrollProgressVal = useMotionValue(0);
   const [beat, setBeat] = useState(0);
   const [phase, setPhase] = useState<ReturnType<typeof phaseFor>>("hero");
   const [interactionMode, setInteractionMode] = useState<"normal" | "zoomed-gallery" | "contact" | "menu">("normal");
   const [activeOverlay, setActiveOverlay] = useState<"none" | "favorites" | "footer">("none");
+  const [favoritesInteractive, setFavoritesInteractive] = useState(false);
   const [shutterFlash, setShutterFlash] = useState(false);
   const lenis = useContext(LenisContext);
 
@@ -136,6 +139,7 @@ export default function CameraExperience() {
       const total = el.offsetHeight - window.innerHeight;
       const p = total > 0 ? clamp01(-el.getBoundingClientRect().top / total) : 0;
       progress.current = p;
+      scrollProgressVal.set(p);
 
       const b = beatFor(p);
       setBeat((prev) => (prev === b ? prev : b));
@@ -144,11 +148,17 @@ export default function CameraExperience() {
       // Determine active overlay from scroll progress
       setActiveOverlay((prev) => {
         let next: "none" | "favorites" | "footer" = "none";
-        if (p >= 0.80 && p < 0.92) {
+        if (p >= 0.815 && p < 0.905) {
           next = "favorites";
-        } else if (p >= 0.92) {
+        } else if (p >= 0.93) {
           next = "footer";
         }
+        return prev === next ? prev : next;
+      });
+
+      // Track whether the favorites overlay should be interactive (fully zoomed in)
+      setFavoritesInteractive((prev) => {
+        const next = p >= 0.82 && p < 0.90;
         return prev === next ? prev : next;
       });
     };
@@ -245,15 +255,14 @@ export default function CameraExperience() {
     playShutterSound();
     setShutterFlash(true);
     setTimeout(() => {
-      setInteractionMode("contact");
+      navigate("/contact");
     }, 150);
   };
 
-  const lcdOpacity = useTransform(scrollYProgress, [0.80, 0.82, 0.90, 0.92], [0, 1, 1, 0]);
-  const lcdScale = useTransform(scrollYProgress, [0.80, 0.82, 0.90, 0.92], [0.95, 1, 1, 0.95]);
 
-  const footerOpacity = useTransform(scrollYProgress, [0.92, 0.95], [0, 1]);
-  const footerTranslateY = useTransform(scrollYProgress, [0.93, 1.00], ["0%", "-40%"]);
+
+  const footerOpacity = useTransform(scrollProgressVal, [0.92, 0.95], [0, 1]);
+  const footerTranslateY = useTransform(scrollProgressVal, [0.92, 0.96, 1.00], ["100%", "0%", "0%"]);
 
   return (
     <section className="camera-act" ref={section}>
@@ -286,10 +295,7 @@ export default function CameraExperience() {
                 beat={beat} 
                 photos={VIEWFINDER_CYCLE} 
                 debug={DEBUG}
-                interactionMode={interactionMode}
-                showHotspots={false}
-                onPlayClick={() => setInteractionMode("zoomed-gallery")}
-                onMenuClick={() => setInteractionMode("menu")}
+                showHotspots={phase === "exploded"}
                 onShutterClick={handleShutterClick}
               />
             </Suspense>
@@ -489,18 +495,15 @@ export default function CameraExperience() {
                       <span className="text">Services</span>
                       <span className="kicker">Creative development & commissions</span>
                     </Link>
-                    <a 
-                      href="#contact" 
+                    <Link 
+                      to="/contact" 
                       className="menu-link-item" 
-                      onClick={(e) => { 
-                        e.preventDefault(); 
-                        setInteractionMode("contact"); 
-                      }}
+                      onClick={() => setInteractionMode("normal")}
                     >
                       <span className="num">05</span>
                       <span className="text">Work With Me</span>
                       <span className="kicker">Drop an inquiry brief</span>
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </motion.div>
@@ -509,16 +512,15 @@ export default function CameraExperience() {
         </AnimatePresence>
 
         {/* ---------- scroll-linked favorites zoom overlay ---------- */}
-        <motion.div
+        <div
           className="lcd-zoom-overlay"
           style={{
-            opacity: lcdOpacity,
-            scale: lcdScale,
-            pointerEvents: activeOverlay === "favorites" ? "auto" : "none",
+            pointerEvents: favoritesInteractive ? "auto" : "none",
+            display: activeOverlay === "favorites" ? "block" : "none",
           }}
         >
-          <FavoritesGallery scrollYProgress={scrollYProgress} />
-        </motion.div>
+          <FavoritesGallery scrollYProgress={scrollProgressVal} />
+        </div>
 
         {/* ---------- footer/contact exploded view overlay ---------- */}
         <motion.div
@@ -532,7 +534,7 @@ export default function CameraExperience() {
             className="exploded-footer-content"
             style={{ y: footerTranslateY }}
           >
-            <Footer />
+            <Footer showInquiry={false} />
           </motion.div>
         </motion.div>
       </div>

@@ -12,7 +12,7 @@ export default function Nav() {
           <NavLink to="/prints">Prints</NavLink>
           <NavLink to="/about">About</NavLink>
           <NavLink to="/services">Services</NavLink>
-          <a className="nav-cta" href="#contact" data-cursor="email">Work with me</a>
+          <Link className="nav-cta" to="/contact" data-cursor="email">Work with me</Link>
         </div>
       </div>
     </nav>

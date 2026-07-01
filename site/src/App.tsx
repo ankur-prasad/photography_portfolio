@@ -18,6 +18,7 @@ const WorkPage = lazy(() => import("./pages/WorkPage"));
 const ServicesPage = lazy(() => import("./pages/ServicesPage"));
 const PrintsPage = lazy(() => import("./pages/PrintsPage"));
 const LabPage = lazy(() => import("./pages/LabPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
 const ModelInspector = lazy(() => import("./components/ModelInspector"));
 const AssetLab = lazy(() => import("./components/AssetLab"));
 
@@ -63,6 +64,7 @@ export default function App() {
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/prints" element={<PrintsPage />} />
               <Route path="/lab" element={<LabPage />} />
+              <Route path="/contact" element={<ContactPage />} />
             </Routes>
           </Suspense>
         </BrowserRouter>

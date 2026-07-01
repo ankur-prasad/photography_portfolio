@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import Inquiry from "./Inquiry";
 
-export default function Footer() {
+export default function Footer({ showInquiry = true }: { showInquiry?: boolean }) {
   const year = 2026;
   return (
     <>
-      <Inquiry />
+      {showInquiry && <Inquiry />}
 
       <footer className="footer">
         <div className="container">

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Html, useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import {
@@ -36,16 +36,72 @@ const LENS_URL = "/models/camera_lens.glb";
 useGLTF.preload(BODY_URL);
 useGLTF.preload(LENS_URL);
 useTexture.preload("/web/ANK00641.jpg");
+useTexture.preload("/web/ANK00014.jpg");
 
-function LcdImage({ src, opacityRef }: { src: string; opacityRef: React.MutableRefObject<number> }) {
-  const tex = useTexture(src);
+function LcdImage({
+  firstSrc,
+  lastSrc,
+  progress,
+  opacityRef,
+}: {
+  firstSrc: string;
+  lastSrc: string;
+  progress: React.MutableRefObject<number>;
+  opacityRef: React.MutableRefObject<number>;
+}) {
+  const texFirst = useTexture(firstSrc);
+  const texLast = useTexture(lastSrc);
+  const { size } = useThree();
+  const r_viewport = size.width / size.height;
+
   const mat = useMemo(() => {
-    tex.colorSpace = THREE.SRGBColorSpace;
-    return new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, toneMapped: false, side: THREE.DoubleSide });
-  }, [tex]);
+    texFirst.colorSpace = THREE.SRGBColorSpace;
+    texLast.colorSpace = THREE.SRGBColorSpace;
+
+    // Apply cover-fit aspect ratio mapping to match HTML object-fit: cover for the viewport
+    const fit = (t: THREE.Texture) => {
+      const img = t.image as any;
+      if (!img || !img.width || !img.height) return;
+      const r_tex = img.width / img.height;
+      if (r_tex > r_viewport) {
+        t.repeat.set(r_viewport / r_tex, 1);
+        t.offset.set((1 - t.repeat.x) / 2, 0);
+      } else {
+        t.repeat.set(1, r_tex / r_viewport);
+        t.offset.set(0, (1 - t.repeat.y) / 2);
+      }
+      t.matrixAutoUpdate = false;
+      t.updateMatrix();
+    };
+
+    fit(texFirst);
+    fit(texLast);
+
+    return new THREE.MeshBasicMaterial({
+      map: texFirst,
+      transparent: true,
+      opacity: 0,
+      toneMapped: false,
+      side: THREE.DoubleSide,
+    });
+  }, [texFirst, texLast, r_viewport]);
 
   useFrame(() => {
     mat.opacity = opacityRef.current;
+
+    // Swap map texture based on scroll progress
+    const p = progress.current;
+    if (p >= 0.86) {
+      if (mat.map !== texLast) {
+        mat.map = texLast;
+        mat.needsUpdate = true;
+      }
+    } else {
+      if (mat.map !== texFirst) {
+        mat.map = texFirst;
+        mat.needsUpdate = true;
+      }
+    }
   });
 
   return (
@@ -193,9 +249,9 @@ function ViewfinderPhoto({
 }
 
 /* ---------- leader-line label anchored to a part ---------- */
-function Label({ part, show }: { part: Part; show: boolean }) {
+function Label({ part, show, useGroupPosition }: { part: Part; show: boolean; useGroupPosition?: boolean }) {
   return (
-    <Html position={ANCHOR[part.anchor]} center={false} zIndexRange={[18, 0]} pointerEvents="none">
+    <Html position={useGroupPosition ? undefined : ANCHOR[part.anchor]} center={false} zIndexRange={[18, 0]} pointerEvents="none">
       <div
         className={`cam-label ${part.side}`}
         style={{
@@ -412,19 +468,13 @@ export interface CameraModelProps {
   beat: number;
   photos: string[];
   debug?: boolean;
-  interactionMode?: "normal" | "zoomed-gallery" | "contact" | "menu";
   showHotspots?: boolean;
-  onPlayClick?: () => void;
-  onMenuClick?: () => void;
   onShutterClick?: () => void;
 }
 
 export default function CameraModel({
   progress, beat, photos, debug,
-  interactionMode = "normal",
   showHotspots = false,
-  onPlayClick,
-  onMenuClick,
   onShutterClick,
 }: CameraModelProps) {
   const root = useRef<THREE.Group>(null);
@@ -439,6 +489,7 @@ export default function CameraModel({
   const capCoverGroupRef = useRef<THREE.Group>(null);
   const sensorGroupRef = useRef<THREE.Group>(null);
   const shutterGroupRef = useRef<THREE.Group>(null);
+  const shutterLabelGroupRef = useRef<THREE.Group>(null);
   const zoomTargetGroupRef = useRef<THREE.Group>(null);
   const lcdScreenGroupRef = useRef<THREE.Group>(null);
 
@@ -475,7 +526,7 @@ export default function CameraModel({
     shutterSlat: new THREE.MeshStandardMaterial({ color: 0x2a2a30, metalness: 0.55, roughness: 0.5, transparent: true, opacity: 0 }),
   }), []);
 
-  useFrame((_, dt) => {
+  useFrame((state, dt) => {
     /* the body/lens GLB scans carry baked-in alpha (scan holes, decal cutouts)
        that the renderer ignores while a material is opaque. Forcing
        transparent=true permanently — as this used to do — makes those holes
@@ -592,66 +643,90 @@ export default function CameraModel({
       viewfinderIndex.current = viewfinderIndexFor(p, photos.length);
     }
     shutterOpen.current = shutterOpenFor(p);
+    if (shutterLabelGroupRef.current) {
+      shutterLabelGroupRef.current.position.set(0.141, shutterOpen.current * 0.2, 0.009);
+    }
     irisOpen.current = irisOpenFor(p);
 
-    // Exploded view offsets at the scroll end (0.93 -> 1.0)
-    const explodeT = smoothstep(0.93, 1.0, p);
-    
-    if (bodyGroupRef.current) {
-      bodyGroupRef.current.position.set(
-        PLACEMENT.body.position[0],
-        PLACEMENT.body.position[1],
-        PLACEMENT.body.position[2] - 0.4 * explodeT
-      );
-    }
-    if (lensGroupRef.current) {
-      lensGroupRef.current.position.set(
-        PLACEMENT.lens.position[0],
-        PLACEMENT.lens.position[1],
-        PLACEMENT.lens.position[2] + 1.8 * explodeT
-      );
-    }
-    if (irisGroupRef.current) {
-      irisGroupRef.current.position.set(
-        PLACEMENT.iris.position[0],
-        PLACEMENT.iris.position[1],
-        PLACEMENT.iris.position[2] + 1.0 * explodeT
-      );
-    }
-    if (capCoverGroupRef.current) {
-      capCoverGroupRef.current.position.set(
-        PLACEMENT.capCover.position[0],
-        PLACEMENT.capCover.position[1],
-        PLACEMENT.capCover.position[2] + 0.4 * explodeT
-      );
-    }
-    if (sensorGroupRef.current) {
-      sensorGroupRef.current.position.set(
-        PLACEMENT.sensor.position[0],
-        PLACEMENT.sensor.position[1],
-        PLACEMENT.sensor.position[2] + 0.1 * explodeT
-      );
-    }
-    if (shutterGroupRef.current) {
-      shutterGroupRef.current.position.set(
-        PLACEMENT.shutter.position[0],
-        PLACEMENT.shutter.position[1],
-        PLACEMENT.shutter.position[2] + 0.25 * explodeT
-      );
-    }
-    if (zoomTargetGroupRef.current) {
-      zoomTargetGroupRef.current.position.set(
-        PLACEMENT.zoomTarget.position[0],
-        PLACEMENT.zoomTarget.position[1],
-        PLACEMENT.zoomTarget.position[2] - 0.4 * explodeT
-      );
-    }
+    if (bodyGroupRef.current) bodyGroupRef.current.position.fromArray(PLACEMENT.body.position);
+    if (lensGroupRef.current) lensGroupRef.current.position.fromArray(PLACEMENT.lens.position);
+    if (irisGroupRef.current) irisGroupRef.current.position.fromArray(PLACEMENT.iris.position);
+    if (capCoverGroupRef.current) capCoverGroupRef.current.position.fromArray(PLACEMENT.capCover.position);
+    if (sensorGroupRef.current) sensorGroupRef.current.position.fromArray(PLACEMENT.sensor.position);
+    if (shutterGroupRef.current) shutterGroupRef.current.position.fromArray(PLACEMENT.shutter.position);
+    if (zoomTargetGroupRef.current) zoomTargetGroupRef.current.position.fromArray(PLACEMENT.zoomTarget.position);
     if (lcdScreenGroupRef.current) {
-      lcdScreenGroupRef.current.position.set(
-        PLACEMENT.lcdScreen.position[0],
-        PLACEMENT.lcdScreen.position[1],
-        PLACEMENT.lcdScreen.position[2] - 0.4 * explodeT
-      );
+      const group = lcdScreenGroupRef.current;
+      group.position.fromArray(PLACEMENT.lcdScreen.position);
+
+      // Update world matrices recursively to ensure projection matches current-frame transforms
+      group.updateMatrixWorld(true);
+
+      // Project the 4 corners of the LCD screen plane to 2D screen space
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const tempV = new THREE.Vector3();
+      const cornersLocal = [
+        new THREE.Vector3(-0.5, -0.5, 0.002),
+        new THREE.Vector3(0.5, -0.5, 0.002),
+        new THREE.Vector3(-0.5, 0.5, 0.002),
+        new THREE.Vector3(0.5, 0.5, 0.002),
+      ];
+
+      let minX = width;
+      let maxX = 0;
+      let minY = height;
+      let maxY = 0;
+
+      cornersLocal.forEach((corner) => {
+        tempV.copy(corner);
+        // Apply LcdImage local rotation (Math.PI Y) and offset (Z = 0.002)
+        tempV.x = -tempV.x;
+        tempV.z = -tempV.z;
+        tempV.z += 0.002;
+
+        group.localToWorld(tempV);
+        tempV.project(state.camera);
+
+        const screenX = (tempV.x * 0.5 + 0.5) * width;
+        const screenY = (-(tempV.y * 0.5) + 0.5) * height;
+
+        if (screenX < minX) minX = screenX;
+        if (screenX > maxX) maxX = screenX;
+        if (screenY < minY) minY = screenY;
+        if (screenY > maxY) maxY = screenY;
+      });
+
+      const screenWidth = maxX - minX;
+      const screenHeight = maxY - minY;
+      const centerX = minX + screenWidth / 2;
+      const centerY = minY + screenHeight / 2;
+      const scaleX = screenWidth / width;
+      const scaleY = screenHeight / height;
+
+      document.documentElement.style.setProperty("--lcd-3d-x", `${centerX.toFixed(1)}px`);
+      document.documentElement.style.setProperty("--lcd-3d-y", `${centerY.toFixed(1)}px`);
+      document.documentElement.style.setProperty("--lcd-3d-w", `${screenWidth.toFixed(1)}px`);
+      document.documentElement.style.setProperty("--lcd-3d-h", `${screenHeight.toFixed(1)}px`);
+      document.documentElement.style.setProperty("--lcd-scale-x", scaleX.toFixed(4));
+      document.documentElement.style.setProperty("--lcd-scale-y", scaleY.toFixed(4));
+
+      // Calculate t (interpolation factor) for a quick fade-in/out at the zoom boundaries
+      let t = 0;
+      if (p >= 0.815 && p <= 0.905) {
+        if (p < 0.825) {
+          // Fade in between 0.815 and 0.825
+          t = (p - 0.815) / 0.01;
+        } else if (p > 0.895) {
+          // Fade out between 0.895 and 0.905
+          t = 1 - (p - 0.895) / 0.01;
+        } else {
+          t = 1;
+        }
+      } else {
+        t = 0;
+      }
+      document.documentElement.style.setProperty("--lcd-t", t.toFixed(4));
     }
 
     if (root.current) root.current.rotation.y = Math.sin(p * 0.5) * 0.012;
@@ -705,6 +780,14 @@ export default function CameraModel({
       {/* focal-plane shutter, just in front of the sensor */}
       <group ref={shutterGroupRef} position={PLACEMENT.shutter.position} rotation={PLACEMENT.shutter.rotation} scale={PLACEMENT.shutter.scale}>
         <ShutterMech slatMat={M.shutterSlat} openRef={shutterOpen} />
+        {(() => {
+          const shutterPart = PARTS.find((p) => p.anchor === "mount");
+          return shutterPart ? (
+            <group ref={shutterLabelGroupRef}>
+              <Label part={shutterPart} show={showLabel(shutterPart.beat)} useGroupPosition />
+            </group>
+          ) : null;
+        })()}
       </group>
 
       {/* the hero photo, pinned to the viewfinder eyepiece */}
@@ -714,12 +797,13 @@ export default function CameraModel({
 
       {/* the LCD screen image, visible when rotating/zooming to the screen */}
       <group ref={lcdScreenGroupRef} position={PLACEMENT.lcdScreen.position} rotation={PLACEMENT.lcdScreen.rotation} scale={PLACEMENT.lcdScreen.scale}>
-        <LcdImage src="/web/ANK00641.jpg" opacityRef={lcdImageOpacity} />
+        <LcdImage firstSrc="/web/ANK00641.jpg" lastSrc="/web/ANK00014.jpg" progress={progress} opacityRef={lcdImageOpacity} />
       </group>
 
-      {PARTS.map((part) => (
-        <Label key={part.no} part={part} show={showLabel(part.beat)} />
-      ))}
+      {PARTS.map((part) => {
+        if (part.anchor === "mount") return null;
+        return <Label key={part.no} part={part} show={showLabel(part.beat)} />;
+      })}
 
       {debug && typeof window !== "undefined" && window.location.search.includes("spheres") &&
         Object.entries(ANCHOR).map(([k, v]) => (
@@ -728,36 +812,8 @@ export default function CameraModel({
             <meshBasicMaterial color={k === "lensFront" ? "#ff4040" : "#40ff80"} />
           </mesh>
         ))}
-      {showHotspots && interactionMode === "normal" && (
+      {showHotspots && (
         <>
-          {/* Play Button Hotspot (View Gallery) */}
-          <group position={PLACEMENT.playButton.position}>
-            <Html center zIndexRange={[20, 0]}>
-              <div
-                className="cam-hotspot"
-                onClick={(e) => { e.stopPropagation(); onPlayClick?.(); }}
-              >
-                <div className="cam-hotspot-ring" />
-                <div className="cam-hotspot-dot" />
-                <div className="cam-hotspot-label label-below">View Gallery</div>
-              </div>
-            </Html>
-          </group>
-
-          {/* Menu Button Hotspot */}
-          <group position={PLACEMENT.menuButton.position}>
-            <Html center zIndexRange={[20, 0]}>
-              <div
-                className="cam-hotspot"
-                onClick={(e) => { e.stopPropagation(); onMenuClick?.(); }}
-              >
-                <div className="cam-hotspot-ring" />
-                <div className="cam-hotspot-dot" />
-                <div className="cam-hotspot-label label-below">Menu</div>
-              </div>
-            </Html>
-          </group>
-
           {/* Shutter Button Hotspot (Shoot / Work With Me) */}
           <group position={PLACEMENT.shutterButton.position}>
             <Html center zIndexRange={[20, 0]}>

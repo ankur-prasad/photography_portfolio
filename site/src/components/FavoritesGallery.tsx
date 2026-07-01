@@ -1,5 +1,6 @@
 import { motion, useTransform, MotionValue } from "framer-motion";
 import MasonryGrid from "./MasonryGrid";
+import ParallaxImage from "./ParallaxImage";
 
 /*
  * 16 curated favorites drawn from across all pillars — uses the web-optimised
@@ -24,6 +25,10 @@ const FAVORITES = [
   { src: "/web/ANK00014.jpg",           alt: "Motion held still",            height: 360 },
 ];
 
+const FIRST_PHOTO = FAVORITES[0];
+const LAST_PHOTO = FAVORITES[FAVORITES.length - 1];
+const MIDDLE_FAVORITES = FAVORITES.slice(1, FAVORITES.length - 1);
+
 interface FavoritesGalleryProps {
   scrollYProgress: MotionValue<number>;
 }
@@ -47,19 +52,34 @@ export default function FavoritesGallery({ scrollYProgress }: FavoritesGalleryPr
         : 1
       : 3;
 
-  // Translate the gallery content container upward to simulate scroll
-  const translateY = useTransform(
+  // Track scroll factor (0 to 1) between scroll progress 0.82 and 0.90
+  const scrollFactor = useTransform(
     scrollYProgress,
-    [0.80, 0.90],
-    ["0%", "-65%"]
+    [0.82, 0.90],
+    [0, 1]
   );
 
   return (
     <div className="favorites-gallery-scroll-wrapper">
       <motion.div
         className="favorites-gallery"
-        style={{ y: translateY, willChange: "transform" }}
+        style={{
+          "--scroll-factor": scrollFactor,
+          willChange: "transform",
+        } as any}
       >
+        {/* First Photo - Full Viewport Static */}
+        <div className="favorites-gallery__hero-section">
+          <ParallaxImage
+            src={FIRST_PHOTO.src}
+            alt={FIRST_PHOTO.alt}
+            height="100vh"
+            radius={0}
+            intensity={0}
+          />
+        </div>
+
+        {/* Middle Content - Centered Grid & Header */}
         <div className="favorites-gallery__inner">
           <motion.div
             className="favorites-gallery__header"
@@ -77,12 +97,23 @@ export default function FavoritesGallery({ scrollYProgress }: FavoritesGalleryPr
           </motion.div>
 
           <MasonryGrid
-            items={FAVORITES}
+            items={MIDDLE_FAVORITES}
             columns={cols}
             gap={6}
             parallaxIntensity={10}
             cardRadius={3}
             lightbox
+          />
+        </div>
+
+        {/* Last Photo - Full Viewport Static */}
+        <div className="favorites-gallery__hero-section">
+          <ParallaxImage
+            src={LAST_PHOTO.src}
+            alt={LAST_PHOTO.alt}
+            height="100vh"
+            radius={0}
+            intensity={0}
           />
         </div>
       </motion.div>

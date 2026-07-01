@@ -9,6 +9,15 @@
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
   --font-mono: "Space Mono", ui-monospace, monospace;
+
+  /* LCD Zoom Variables */
+  --lcd-3d-x: 50vw;
+  --lcd-3d-y: 50vh;
+  --lcd-3d-w: 0px;
+  --lcd-3d-h: 0px;
+  --lcd-scale-x: 0.25;
+  --lcd-scale-y: 0.25;
+  --lcd-t: 0;
 }
 
 * {
@@ -2157,6 +2166,18 @@ button {
   background: #08080a;
   overflow: hidden;
   will-change: transform, opacity;
+
+  --tx: calc((var(--lcd-3d-x) - 50vw) * (1 - var(--lcd-t)));
+  --ty: calc((var(--lcd-3d-y) - 50vh) * (1 - var(--lcd-t)));
+  --sx: calc(var(--lcd-scale-x) * (1 - var(--lcd-t)) + var(--lcd-t));
+  --sy: calc(var(--lcd-scale-y) * (1 - var(--lcd-t)) + var(--lcd-t));
+
+  transform: translate3d(var(--tx), var(--ty), 0) scale(var(--sx), var(--sy));
+  transform-origin: center center;
+  opacity: 1;
+  border-radius: calc(12px * (1 - var(--lcd-t)));
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, calc(0.5 * (1 - var(--lcd-t))));
+  border: calc(1px * (1 - var(--lcd-t))) solid rgba(237, 237, 235, calc(0.15 * (1 - var(--lcd-t))));
 }
 .favorites-gallery-scroll-wrapper {
   position: absolute;
@@ -2169,11 +2190,23 @@ button {
   position: relative;
   width: 100%;
   background: #08080a;
-  padding: clamp(60px, 12vh, 140px) clamp(20px, 5vw, 64px) clamp(120px, 20vh, 280px);
+  padding: 0;
+  transform: translateY(calc(var(--scroll-factor, 0) * (-100% + 100vh)));
+  display: flex;
+  flex-direction: column;
+}
+.favorites-gallery__hero-section {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
 }
 .favorites-gallery__inner {
   max-width: 1200px;
   margin: 0 auto;
+  padding: clamp(80px, 15vh, 160px) clamp(20px, 5vw, 64px);
+  width: 100%;
+  box-sizing: border-box;
 }
 .favorites-gallery__header {
   margin-bottom: clamp(40px, 8vh, 80px);
@@ -2205,13 +2238,16 @@ button {
   inset: 0;
   z-index: 9;
   background: radial-gradient(circle at center, transparent 35%, rgba(8, 8, 10, 0.85) 100%);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: none;
   will-change: opacity;
 }
 .exploded-footer-content {
   position: relative;
   width: 100%;
+  pointer-events: auto;
   will-change: transform;
 }
 /* Ensure footer text is highly readable over the 3D canvas background */
