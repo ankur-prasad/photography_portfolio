@@ -9,7 +9,7 @@ import Gallery from "./Gallery";
 import Inquiry from "./Inquiry";
 import Footer from "./Footer";
 import FavoritesGallery from "./FavoritesGallery";
-import { PARTS, beatFor, clamp01, samplePose, PLACEMENT } from "../data/cameraScript";
+import { PARTS, beatFor, clamp01, samplePose, smoothstep, PLACEMENT } from "../data/cameraScript";
 import { LenisContext } from "../lib/LenisContext";
 
 /* the viewfinder flipbook — opens FULL-BLEED on water (ANK00641, "Surface"),
@@ -43,6 +43,7 @@ function CameraRig({
 }) {
   const { camera } = useThree();
   const advance = useThree((s) => s.advance);
+  const size = useThree((s) => s.size);
   const cur = useRef(0);
   const curPos = useRef(new THREE.Vector3());
   const curTgt = useRef(new THREE.Vector3());
@@ -70,6 +71,21 @@ function CameraRig({
 
     const targetPos = new THREE.Vector3(scrollPose.pos[0], scrollPose.pos[1], scrollPose.pos[2]);
     const targetLook = new THREE.Vector3(scrollPose.target[0], scrollPose.target[1], scrollPose.target[2]);
+
+    // Responsive fit: portrait/narrow viewports have a much smaller HORIZONTAL
+    // field of view, so the desktop-tuned shots overflow the sides (the camera
+    // spills off-screen on phones). Dolly the camera straight back along its
+    // view axis — same angle, same framing centre — until the whole body fits.
+    // Purely a viewport response; the SHOTS themselves are untouched.
+    const aspect = size.width / Math.max(1, size.height);
+    const fit = aspect >= 1.5 ? 1 : Math.min(2.2, Math.max(1, 1.5 / aspect));
+    // ...but not during the LCD-zoom / favorites range (p≈0.74–0.94): that shot
+    // drives the on-screen favorites overlay off the projected LCD rect, so
+    // dollying back there would shrink/misalign it. Ramp the dolly out for it.
+    const pc = cur.current;
+    const env = 1 - smoothstep(0.70, 0.755, pc) * (1 - smoothstep(0.975, 0.99, pc));
+    const effFit = 1 + (fit - 1) * env;
+    if (effFit !== 1) targetPos.sub(targetLook).multiplyScalar(effFit).add(targetLook);
 
     if (interactionMode === "zoomed-gallery") {
       const screenPos = PLACEMENT.lcdScreen.position; // [-0.14, 0.06, -0.94]
@@ -106,8 +122,8 @@ function phaseFor(p: number): "hero" | "pause" | "reveal" | "parts" | "thesis" |
   if (p < 0.04692) return "pause";
   if (p < 0.10909) return "reveal";
   if (p < 0.70) return "parts";
-  if (p < 0.78) return "thesis";
-  if (p < 0.92) return "favorites";
+  if (p < 0.785) return "thesis";
+  if (p < 0.975) return "favorites";
   return "exploded";
 }
 
@@ -148,9 +164,9 @@ export default function CameraExperience() {
       // Determine active overlay from scroll progress
       setActiveOverlay((prev) => {
         let next: "none" | "favorites" | "footer" = "none";
-        if (p >= 0.815 && p < 0.905) {
+        if (p >= 0.785 && p < 0.96) {
           next = "favorites";
-        } else if (p >= 0.93) {
+        } else if (p >= 0.975) {
           next = "footer";
         }
         return prev === next ? prev : next;
@@ -158,7 +174,7 @@ export default function CameraExperience() {
 
       // Track whether the favorites overlay should be interactive (fully zoomed in)
       setFavoritesInteractive((prev) => {
-        const next = p >= 0.82 && p < 0.90;
+        const next = p >= 0.79 && p < 0.955;
         return prev === next ? prev : next;
       });
     };
@@ -261,8 +277,8 @@ export default function CameraExperience() {
 
 
 
-  const footerOpacity = useTransform(scrollProgressVal, [0.92, 0.95], [0, 1]);
-  const footerTranslateY = useTransform(scrollProgressVal, [0.92, 0.96, 1.00], ["100%", "0%", "0%"]);
+  const footerOpacity = useTransform(scrollProgressVal, [0.975, 0.99], [0, 1]);
+  const footerTranslateY = useTransform(scrollProgressVal, [0.975, 0.995, 1.00], ["100%", "0%", "0%"]);
 
   return (
     <section className="camera-act" ref={section}>
@@ -313,7 +329,9 @@ export default function CameraExperience() {
               <span className="line">Prasad</span>
             </h1>
             <p className="act-hero-sub">
-              I notice what the eye would miss — and freeze it into a single frame.
+              Light, captured in a single frame.
+              <br />
+              Eyes forget. Frames don't.
             </p>
           </div>
         </div>
@@ -365,8 +383,6 @@ export default function CameraExperience() {
         >
           <p>
             One tool to freeze time in a single frame.
-            <br />
-            And these are some moments <span className="accent">I decided to freeze.</span>
           </p>
         </div>
 
@@ -511,13 +527,15 @@ export default function CameraExperience() {
           )}
         </AnimatePresence>
 
-        {/* ---------- scroll-linked favorites zoom overlay ---------- */}
+        {/* ---------- scroll-linked favorites zoom overlay ----------
+            Fade in/out via opacity (not a hard display toggle): the overlay's
+            grow-from-LCD transform is driven by the eased camera, which lags the
+            raw scroll — a display pop at the raw boundary showed the opaque
+            overlay at a lagging position while scrubbing. A short opacity fade
+            smooths that so it never flickers at the thesis/favorites handoff. */}
         <div
-          className="lcd-zoom-overlay"
-          style={{
-            pointerEvents: favoritesInteractive ? "auto" : "none",
-            display: activeOverlay === "favorites" ? "block" : "none",
-          }}
+          className={`lcd-zoom-overlay${activeOverlay === "favorites" ? " is-active" : ""}`}
+          style={{ pointerEvents: favoritesInteractive ? "auto" : "none" }}
         >
           <FavoritesGallery scrollYProgress={scrollProgressVal} />
         </div>

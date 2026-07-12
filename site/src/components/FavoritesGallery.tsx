@@ -42,20 +42,17 @@ const EASE = [0.16, 1, 0.3, 1] as const;
  * It scrolls up dynamically as scrollYProgress goes from 0.80 to 0.90.
  */
 export default function FavoritesGallery({ scrollYProgress }: FavoritesGalleryProps) {
-  // Responsive columns — detected via CSS media query fallback
+  // Responsive columns. Phones use 2 columns (not 1) so the single-column
+  // gallery isn't ~8 viewport-heights tall — which made it scrub past far
+  // faster than the scroll on mobile.
   const cols =
-    typeof window !== "undefined"
-      ? window.innerWidth >= 1024
-        ? 3
-        : window.innerWidth >= 600
-        ? 2
-        : 1
-      : 3;
+    typeof window !== "undefined" ? (window.innerWidth >= 1024 ? 3 : 2) : 3;
 
-  // Track scroll factor (0 to 1) between scroll progress 0.82 and 0.90
+  // Track scroll factor (0 to 1) across the (widened) favorites window, so the
+  // gallery scrolls through its full height more slowly and smoothly.
   const scrollFactor = useTransform(
     scrollYProgress,
-    [0.82, 0.90],
+    [0.79, 0.955],
     [0, 1]
   );
 
@@ -90,9 +87,7 @@ export default function FavoritesGallery({ scrollYProgress }: FavoritesGalleryPr
           >
             <p className="eyebrow">// My Favorites</p>
             <h2 className="favorites-gallery__title">
-              Moments I keep
-              <br />
-              coming back to.
+              And these are some moments <span className="accent">I decided to freeze.</span>
             </h2>
           </motion.div>
 

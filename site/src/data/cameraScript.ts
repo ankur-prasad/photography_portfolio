@@ -127,8 +127,8 @@ export function beatFor(p: number): number {
   if (p < 0.51) return 4;
   if (p < 0.60) return 5;
   if (p < 0.70) return 6;
-  if (p < 0.75) return 7;
-  if (p < 0.90) return 8;
+  if (p < 0.79) return 7; // processor → LCD handoff (slow swing + settle)
+  if (p < 0.975) return 8; // favorites — widened so the gallery scrolls at ~site pace
   return 9;
 }
 
@@ -235,11 +235,11 @@ export const SHOTS: Shot[] = [
   { p: 0.48, focus: [0.207, -0.118, 0.58], dir: [0.018, 0.046, 0.998], dist: 2.568 }, // open mount (shutter)
   { p: 0.60, focus: [0.21, -0.114, 0.705], dir: [0.016, 0.037, 0.99], dist: 1.172 }, // the sensor
   { p: 0.70, focus: "body", dir: [-0.77, 0.267, 0.58], dist: 4.866 }, // processor — whole body, 3/4
-  { p: 0.74, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // settle on back, looking straight at LCD screen
-  { p: 0.78, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // hold pulled back looking straight at screen
-  { p: 0.82, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // zoom into LCD screen
-  { p: 0.90, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // hold zoomed in during favorites
-  { p: 0.93, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // zoom out straight from LCD screen
+  { p: 0.755, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // slow swing from the processor around to the LCD (back)
+  { p: 0.77, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // hold pulled back looking straight at screen (thesis reads)
+  { p: 0.79, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // gentle zoom into LCD screen
+  { p: 0.955, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // hold zoomed in through the long favorites scroll
+  { p: 0.975, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // gentle zoom out straight from LCD screen
   { p: 1.00, focus: [0.1, -0.1, 0.0], dir: [0.0, 0.98, -0.2], dist: 3.8 }, // top view of fully-assembled camera
 ];
 
