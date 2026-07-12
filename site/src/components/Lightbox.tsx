@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { meta as META } from "../data/photos";
@@ -20,7 +21,10 @@ export default function Lightbox({ src, onClose }: { src: string; onClose: () =>
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  return (
+  // Render into <body> so `position: fixed` resolves against the viewport, not
+  // a transformed ancestor (the favorites gallery / LCD-zoom overlay both carry
+  // transforms, which would otherwise offset this fixed overlay off-screen).
+  return createPortal(
     <motion.div
       className="lightbox"
       initial={{ opacity: 0 }}
@@ -70,6 +74,7 @@ export default function Lightbox({ src, onClose }: { src: string; onClose: () =>
           </div>
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }

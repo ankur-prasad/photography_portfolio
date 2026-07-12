@@ -8,7 +8,7 @@ function clamp01(x: number) {
 function camLabel(p: number) {
   if (p < 0.10909) return "001 — SIGNAL";
   if (p < 0.70) return "002 — THE APPARATUS";
-  if (p < 0.75) return "003 — THE EYE";
+  if (p < 0.785) return "003 — THE EYE";
   return "004 — RECOMPOSE";
 }
 
