@@ -9,6 +9,18 @@ export default function Footer({ showInquiry = true }: { showInquiry?: boolean }
 
       <footer className="footer">
         <div className="container">
+          <div className="footer-intro">
+            <p className="eyebrow">// WHO&apos;S BEHIND THIS</p>
+            <p className="footer-intro-body">
+              Hi — I&apos;m Ankur. By day I engineer AI systems; the rest of the time I chase
+              light. I designed, photographed and built everything on this site — no template,
+              no stock, no agency.
+            </p>
+            <p className="footer-intro-cta">
+              You&apos;ve seen how I see. <Link to="/contact" data-cursor="email">Tell me what you&apos;re making →</Link>
+            </p>
+          </div>
+
           <div className="footer-grid">
             <div className="footer-mark">
               Ankur
@@ -25,7 +37,7 @@ export default function Footer({ showInquiry = true }: { showInquiry?: boolean }
                 <li><Link to="/services">Services</Link></li>
                 <li><Link to="/about">About</Link></li>
                 <li><Link to="/lab">AI Lab</Link></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><Link to="/contact">Contact</Link></li>
               </ul>
             </div>
 
@@ -40,7 +52,17 @@ export default function Footer({ showInquiry = true }: { showInquiry?: boolean }
           </div>
 
           <div className="footer-base">
-            <span>© {year} Ankur Prasad — All frames are mine</span>
+            <span>
+              © {year} Ankur Prasad — All frames are mine
+              {" · "}
+              <Link to="/privacy" className="footer-legal-link">Privacy</Link>
+              {" · "}
+              <Link to="/terms" className="footer-legal-link">Terms</Link>
+              {" · "}
+              <Link to="/impressum" className="footer-legal-link">Impressum</Link>
+              {" · "}
+              <Link to="/datenschutz" className="footer-legal-link">Datenschutz</Link>
+            </span>
             <span className="rec">
               <span className="dot" />
               Designed &amp; built from scratch · Munich

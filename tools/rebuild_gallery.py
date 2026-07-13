@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Rebuild the gallery around the new hand-picked photos (6 new pillars).
+"""DEPRECATED — superseded by tools/import_photos.py (folder-per-pillar source,
+thumbs/mid tiers, photos.json). This script expects site/public/photos, which
+no longer exists (originals moved to assets/originals/). Kept for reference.
+
+Rebuild the gallery around the new hand-picked photos (6 new pillars).
   - moves non-keeps to public/photos/_setaside/   (reversible)
   - normalizes keep filenames: 'ANK0285 (1).jpg'->'ANK0285.jpg', drops '.ARW'
   - regenerates 1400px web jpg + webp into public/web/
@@ -15,12 +19,12 @@ DATA = f"{ROOT}/site/src/data/photos.ts"
 SETASIDE = f"{PHOTOS}/_setaside"
 
 PILLARS = {
-    "dark":  ("After Dark",    "Astro, light trails, the moon — the hours most cameras sleep."),
-    "long":  ("The Long View", "Distance rendered as haze — ridgelines, canyons, the scale of land."),
-    "hard":  ("Hard Lines",    "Cities and structure — glass, grids and deliberate geometry."),
-    "far":   ("Far Afield",    "Places worth the journey — ruins, landmarks and far horizons."),
-    "speed": ("At Speed",      "Machines, roads and motion held still for a thousandth of a second."),
-    "still": ("Held Still",    "Negative space and quiet — sand, water, the frames between."),
+    "dark":  ("Night",  "Astro, light trails, the moon — the hours most cameras sleep."),
+    "long":  ("Nature", "Distance rendered as haze — ridgelines, canyons, the scale of land."),
+    "hard":  ("City",    "Cities and structure — glass, grids and deliberate geometry."),
+    "far":   ("Travel",  "Places worth the journey — ruins, landmarks and far horizons."),
+    "speed": ("Motion",  "Machines, roads and motion held still for a thousandth of a second."),
+    "still": ("Still",   "Negative space and quiet — sand, water, the frames between."),
 }
 ORDER = ["dark","long","hard","far","speed","still"]
 

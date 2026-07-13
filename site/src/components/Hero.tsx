@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import DepthScene from "./DepthScene";
 import { heroes } from "../data/photos";
 
-const heroShot = heroes.find((h) => h.id === "0961") ?? heroes[0];
+const heroShot = heroes.find((h) => h.id === "ANK00164") ?? heroes[0];
 
 const lineAnim = {
   hidden: { y: "110%" },
@@ -29,7 +29,7 @@ export default function Hero() {
   return (
     <header className="hero" id="top" ref={ref}>
       <motion.div className="hero-canvas" style={{ scale: canvasScale, y: canvasY }}>
-        <DepthScene photo={heroShot.photo} depth={heroShot.depth} strength={0.05} />
+        <DepthScene photo={heroShot.web} depth={heroShot.depth} strength={0.05} />
       </motion.div>
       <div className="hero-veil" />
       <motion.div className="hero-copy" style={{ y: copyY, opacity: copyOpacity }}>

@@ -1,24 +1,47 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { meta as META } from "../data/photos";
+import { usePhotos } from "../lib/usePhotos";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 /** Rich lightbox: the frame + its title, location, capture settings, and CTAs.
- *  Shared by the home Gallery and the Work page. */
-export default function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
-  const m = META[src] ?? {};
+ *  Shared by Gallery, Work, MasonryGrid and Prints. Pass `srcs` + `onNavigate`
+ *  to enable prev/next (arrow keys + on-screen chevrons). */
+export default function Lightbox({
+  src,
+  onClose,
+  srcs,
+  onNavigate,
+}: {
+  src: string;
+  onClose: () => void;
+  srcs?: string[];
+  onNavigate?: (src: string) => void;
+}) {
+  const m = usePhotos()?.meta[src] ?? {};
   const webp = src.replace(/\.jpe?g$/i, ".webp");
   const exifLine = [m.year, m.camera, m.settings].filter(Boolean).join("  ·  ");
+  // the filename stem doubles as the photo's id in inquiry prefills
+  const photoId = src.split("/").pop()?.replace(/\.\w+$/, "") ?? "";
+
+  const idx = srcs ? srcs.indexOf(src) : -1;
+  const canNav = !!(srcs && onNavigate && srcs.length > 1 && idx !== -1);
+  const go = (dir: 1 | -1) => {
+    if (!canNav || !srcs || !onNavigate) return;
+    onNavigate(srcs[(idx + dir + srcs.length) % srcs.length]);
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") go(1);
+      if (e.key === "ArrowLeft") go(-1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose, src, srcs, onNavigate]);
 
   return (
     <motion.div
@@ -33,7 +56,26 @@ export default function Lightbox({ src, onClose }: { src: string; onClose: () =>
       <button className="lb-close" onClick={onClose} aria-label="Close" data-cursor="close">
         ✕
       </button>
+      {canNav && (
+        <>
+          <button
+            className="lb-nav prev"
+            aria-label="Previous photo"
+            onClick={(e) => { e.stopPropagation(); go(-1); }}
+          >
+            ←
+          </button>
+          <button
+            className="lb-nav next"
+            aria-label="Next photo"
+            onClick={(e) => { e.stopPropagation(); go(1); }}
+          >
+            →
+          </button>
+        </>
+      )}
       <motion.div
+        key={src}
         className="lb-frame"
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -62,9 +104,14 @@ export default function Lightbox({ src, onClose }: { src: string; onClose: () =>
                 </Link>
               )}
               {m.print && (
-                <a className="lb-link accent" href="#contact" onClick={onClose} data-cursor="email">
-                  Print available — inquire →
-                </a>
+                <Link
+                  className="lb-link accent"
+                  to={`/prints?photo=${encodeURIComponent(photoId)}`}
+                  onClick={onClose}
+                  data-cursor="view"
+                >
+                  See it on your wall →
+                </Link>
               )}
             </div>
           </div>

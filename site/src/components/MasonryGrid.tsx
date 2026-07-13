@@ -93,7 +93,12 @@ export default function MasonryGrid({
 
       <AnimatePresence>
         {lightboxSrc && (
-          <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+          <Lightbox
+            src={lightboxSrc}
+            onClose={() => setLightboxSrc(null)}
+            srcs={items.map((it) => it.src)}
+            onNavigate={setLightboxSrc}
+          />
         )}
       </AnimatePresence>
     </>

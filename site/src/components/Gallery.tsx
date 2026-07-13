@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { galleries, pillars as PILLARS } from "../data/photos";
+import { pillars as PILLARS } from "../data/photos";
+import { usePhotos } from "../lib/usePhotos";
 import Photo from "./Photo";
 import Lightbox from "./Lightbox";
 
 export default function Gallery() {
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const photos = usePhotos();
+  const galleries = photos?.galleries ?? {};
+  const allShown = PILLARS.flatMap((p) => (galleries[p.key] ?? []).slice(0, 5));
 
   return (
     <section className="gallery" id="work">
@@ -40,7 +44,9 @@ export default function Gallery() {
       </div>
 
       <AnimatePresence>
-        {lightbox && <Lightbox src={lightbox} onClose={() => setLightbox(null)} />}
+        {lightbox && (
+          <Lightbox src={lightbox} onClose={() => setLightbox(null)} srcs={allShown} onNavigate={setLightbox} />
+        )}
       </AnimatePresence>
     </section>
   );

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Regenerate src/data/photos.ts WITH per-photo metadata. Safe to re-run; does
+"""DEPRECATED — superseded by tools/import_photos.py (folder-per-pillar source,
+thumbs/mid tiers, photos.json). This script expects site/public/photos, which
+no longer exists (originals moved to assets/originals/). Kept for reference.
+
+Regenerate src/data/photos.ts WITH per-photo metadata. Safe to re-run; does
 NO file operations. Merges:
   - pillar membership (ASSIGN, must match rebuild_gallery.py)
   - EXIF read from site/public/photos/*.jpg  (camera, lens, settings, year)
@@ -14,12 +18,12 @@ PHOTOS, DATA = f"{ROOT}/site/public/photos", f"{ROOT}/site/src/data/photos.ts"
 SIDECAR = f"{ROOT}/tools/photo_meta.json"
 
 PILLARS = {
-    "dark":  ("After Dark",    "Astro, light trails, the moon — the hours most cameras sleep."),
-    "long":  ("The Long View", "Distance rendered as haze — ridgelines, canyons, the scale of land."),
-    "hard":  ("Hard Lines",    "Cities and structure — glass, grids and deliberate geometry."),
-    "far":   ("Far Afield",    "Places worth the journey — ruins, landmarks and far horizons."),
-    "speed": ("At Speed",      "Machines, roads and motion held still for a thousandth of a second."),
-    "still": ("Held Still",    "Negative space and quiet — sand, water, the frames between."),
+    "dark":  ("Night",  "Astro, light trails, the moon — the hours most cameras sleep."),
+    "long":  ("Nature", "Distance rendered as haze — ridgelines, canyons, the scale of land."),
+    "hard":  ("City",    "Cities and structure — glass, grids and deliberate geometry."),
+    "far":   ("Travel",  "Places worth the journey — ruins, landmarks and far horizons."),
+    "speed": ("Motion",  "Machines, roads and motion held still for a thousandth of a second."),
+    "still": ("Still",   "Negative space and quiet — sand, water, the frames between."),
 }
 ORDER = ["dark","long","hard","far","speed","still"]
 HEROES = ["ANK09879","ANK00164","ANK01938","ANK09500","ANK09212","ANK08837","ANK03010","20160503_164015"]

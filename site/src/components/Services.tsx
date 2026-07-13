@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -8,6 +9,7 @@ interface Offer {
   desc: string;
   includes: string[];
   engagement: string;
+  proof?: { label: string; href: string };
 }
 
 const SERVICES: Offer[] = [
@@ -32,6 +34,7 @@ const SERVICES: Offer[] = [
       "Responsive, performance-tuned, deployed",
     ],
     engagement: "Fixed-scope project",
+    proof: { label: "Case study — Perfect World", href: "/work/perfectworld" },
   },
   {
     no: "03",
@@ -94,6 +97,11 @@ export default function Services() {
                 ))}
               </ul>
               <span className="offer-engagement">{s.engagement}</span>
+              {s.proof && (
+                <Link className="offer-proof" to={s.proof.href} data-cursor="view">
+                  {s.proof.label} →
+                </Link>
+              )}
             </motion.article>
           ))}
         </div>

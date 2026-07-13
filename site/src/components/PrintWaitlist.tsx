@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { joinWaitlist } from "../lib/waitlist";
 
@@ -56,6 +57,9 @@ export default function PrintWaitlist() {
       {status === "error" && (
         <p className="waitlist-err">Couldn&apos;t add you — try again, or email me directly.</p>
       )}
+      <p className="form-consent">
+        By joining, you agree to the <Link to="/privacy">Privacy Policy</Link>.
+      </p>
     </form>
   );
 }

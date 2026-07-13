@@ -1,6 +1,8 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { submitInquiry, CONTACT_EMAIL, type Inquiry as InquiryData } from "../lib/inquiry";
+import { usePhotos } from "../lib/usePhotos";
 
 const PROJECT_TYPES = ["Photography", "Web experience", "AI consulting", "Something else"];
 const BUDGETS = ["< €2k", "€2k–5k", "€5k–15k", "€15k+", "Not sure yet"];
@@ -24,6 +26,32 @@ export default function Inquiry() {
   const [error, setError] = useState("");
 
   const set = (k: keyof InquiryData, v: string) => setData((d) => ({ ...d, [k]: v }));
+
+  // print-intent deep link: /contact?photo=ANK00641 (from the lightbox CTA)
+  // prefills the brief so buying a print is one click + send
+  const [params] = useSearchParams();
+  const photosData = usePhotos();
+  useEffect(() => {
+    const photo = params.get("photo");
+    if (!photo || !photosData) return;
+    const title = Object.entries(photosData.meta).find(([k]) => k.includes(photo))?.[1]?.title;
+    const size = params.get("size");
+    const finish = params.get("finish");
+    const option = params.get("option");
+    const sku = params.get("sku");
+    const name = title ? `"${title}" (${photo})` : photo;
+    const details = [size, finish, option, sku ? `SKU ${sku}` : null].filter(Boolean).join(", ");
+    const spec = details ? ` — ${details}` : ". Preferred size / framing: ";
+    setData((d) =>
+      d.message
+        ? d
+        : {
+            ...d,
+            projectType: d.projectType || "Something else",
+            message: `I'd like to order a print of ${name}${spec}${size || finish ? ". Please confirm price and shipping." : ""}`,
+          }
+    );
+  }, [params, photosData]);
   const valid = data.name.trim() && /\S+@\S+\.\S+/.test(data.email) && data.projectType && data.message.trim();
 
   async function onSubmit(e: FormEvent) {
@@ -199,6 +227,10 @@ export default function Inquiry() {
                     Couldn&apos;t send that — try again, or email me directly. {error}
                   </p>
                 )}
+                <p className="form-consent">
+                  By submitting, you agree to the{" "}
+                  <Link to="/privacy">Privacy Policy</Link>.
+                </p>
               </form>
             </motion.div>
           )}

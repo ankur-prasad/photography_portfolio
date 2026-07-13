@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Generate depth maps for the new hero images (Depth Anything V2 Small, MPS).
-Reads from site/public/photos, writes site/public/depth/<stem>__depth.png."""
+"""Generate depth maps for the hero images (Depth Anything V2 Small, MPS).
+Reads originals from assets/originals/<Pillar>/ (recursive), writes
+site/public/depth/<stem>__depth.png."""
 import os, glob
 import torch
 from PIL import Image
 from transformers import pipeline
 
-PHOTOS = os.path.expanduser("~/photography_portfolio/site/public/photos")
+PHOTOS = os.path.expanduser("~/photography_portfolio/assets/originals")
 OUT = os.path.expanduser("~/photography_portfolio/site/public/depth")
 os.makedirs(OUT, exist_ok=True)
 
@@ -22,9 +23,10 @@ print("device:", device)
 pipe = pipeline("depth-estimation", model="depth-anything/Depth-Anything-V2-Small-hf", device=device)
 
 for stem in HEROES:
-    src = f"{PHOTOS}/{stem}.jpg"
-    if not os.path.exists(src):
+    matches = glob.glob(f"{PHOTOS}/*/{stem}.jpg") or glob.glob(f"{PHOTOS}/{stem}.jpg")
+    if not matches:
         print("MISS", stem); continue
+    src = matches[0]
     im = Image.open(src).convert("RGB")
     im.thumbnail((1536, 1536))
     depth = pipe(im)["depth"].resize(im.size)

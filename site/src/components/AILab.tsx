@@ -10,23 +10,19 @@ const ANNOS = [
 ];
 
 const LABELS: Record<string, string> = {
-  "0961": "White Sands, New Mexico",
-  "1146": "Gran Canaria ridgelines",
-  "1268": "Königssee, Bavaria",
-  "0798": "Horseshoe Bend, Arizona",
-  "0762": "Grand Canyon at dawn",
-  "0517": "One World Trade, NYC",
-  "0648": "The Oculus, NYC",
-  "0080": "Autobahn light trails",
-  "0603": "Manhattan after dark",
-  "1461": "Jaguar E-Type, Walchensee",
-  "1432": "E-Type through the curves",
-  "0339": "Frozen lake, Netherlands",
+  ANK09879: "Gran Canaria ridgelines",
+  ANK00164: "White Sands, New Mexico",
+  ANK01938: "Königssee, Bavaria",
+  ANK09500: "Grand Canyon at dawn",
+  ANK09212: "The Oculus, NYC",
+  ANK08837: "One World Trade, from the harbour",
+  ANK03010: "Cappadocia fairy chimneys",
+  "20160503_164015": "Moon jellyfish",
 };
 
 export default function AILab() {
   const [active, setActive] = useState(
-    heroes.find((h) => h.id === "1146") ?? heroes[0]
+    heroes.find((h) => h.id === "ANK09879") ?? heroes[0]
   );
   const [immersive, setImmersive] = useState(false);
 
@@ -60,7 +56,7 @@ export default function AILab() {
           <div className="lab-stage-canvas">
             <DepthScene
               key={active.id}
-              photo={active.photo}
+              photo={active.web}
               depth={active.depth}
               strength={0.075}
               zoom={1.06}
@@ -122,7 +118,7 @@ export default function AILab() {
             transition={{ duration: 0.5 }}
           >
             <DepthScene
-              photo={active.photo}
+              photo={active.web}
               depth={active.depth}
               strength={0.14}
               zoom={1.22}

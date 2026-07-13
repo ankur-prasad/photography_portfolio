@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { galleries, pillars as PILLARS } from "../data/photos";
+import { pillars as PILLARS } from "../data/photos";
+import { usePhotos } from "../lib/usePhotos";
 import WorksIndex from "./WorksIndex";
 import Photo from "./Photo";
 import Lightbox from "./Lightbox";
@@ -9,6 +10,8 @@ import ExpandedMask from "./ExpandedMask";
 export default function Work() {
   const [open, setOpen] = useState<string | null>(null);
   const [view, setView] = useState<"grid" | "index">("grid");
+  const photos = usePhotos();
+  const galleries = photos?.galleries ?? {};
 
   const handlePillarClick = (pillarKey: string) => {
     setView("grid");
@@ -86,7 +89,14 @@ export default function Work() {
       </div>
 
       <AnimatePresence>
-        {open && <Lightbox src={open} onClose={() => setOpen(null)} />}
+        {open && (
+          <Lightbox
+            src={open}
+            onClose={() => setOpen(null)}
+            srcs={PILLARS.flatMap((p) => galleries[p.key] ?? [])}
+            onNavigate={setOpen}
+          />
+        )}
       </AnimatePresence>
     </section>
   );

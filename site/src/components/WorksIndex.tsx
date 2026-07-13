@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { galleries } from "../data/photos";
+import { usePhotos } from "../lib/usePhotos";
 import Photo from "./Photo";
 
 export interface Pillar {
@@ -12,7 +12,7 @@ export interface Pillar {
 
 // 3 representative thumbs per pillar, kept pillar-contiguous so each pillar
 // forms one segment of the arc.
-function buildArc(pillars: Pillar[]) {
+function buildArc(pillars: Pillar[], galleries: Record<string, string[]>) {
   return pillars.flatMap((p, pi) =>
     (galleries[p.key] ?? []).slice(0, 3).map((src, j) => ({ src, pi, key: `${p.key}-${j}` }))
   );
@@ -27,7 +27,8 @@ export default function WorksIndex({
   pillars: Pillar[];
   onOpen: (src: string) => void;
 }) {
-  const arc = buildArc(pillars);
+  const photos = usePhotos();
+  const arc = buildArc(pillars, photos?.galleries ?? {});
   const [hover, setHover] = useState<number | null>(null);
   const n = arc.length;
 

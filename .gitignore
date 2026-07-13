@@ -1,0 +1,4 @@
+.DS_Store
+
+# Full-resolution photo originals (640MB+) — source of truth lives outside git
+assets/originals/

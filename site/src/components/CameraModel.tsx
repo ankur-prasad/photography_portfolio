@@ -31,8 +31,13 @@ import {
    files normalise into DIFFERENT orientations — and every PLACEMENT/ANCHOR/SHOT
    constant is tuned to the split file's space. We just ignore its (bad)
    BodyOnly/LensPortion partition and re-bucket every triangle ourselves. */
-const BODY_URL = "/models/camera_body_split.glb?v=4";
-const LENS_URL = "/models/camera_lens.glb";
+// .min variants: meshopt-compressed (EXT_meshopt_compression + quantization) via
+// gltf-transform — 10MB→2.3MB body, 5.2MB→2.7MB lens. drei's useGLTF decodes
+// meshopt by default. Originals kept for AssetLab/ModelInspector + as source for
+// tools/split_body_glb.cjs (which reads raw f32/u32 and can NOT re-split the
+// compressed file — always re-split from originals, then recompress).
+const BODY_URL = "/models/camera_body_split.min.glb?v=5";
+const LENS_URL = "/models/camera_lens.min.glb?v=5";
 useGLTF.preload(BODY_URL);
 useGLTF.preload(LENS_URL);
 useTexture.preload("/web/ANK00641.jpg");

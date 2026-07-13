@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import HeroPoster from "../components/HeroPoster";
+import ErrorBoundary from "../components/ErrorBoundary";
 import { usePageTitle } from "../lib/usePageTitle";
 
 // The 3D camera (three.js / R3F) is the heaviest dependency in the app — load it
@@ -11,9 +12,13 @@ export default function HomePage() {
   usePageTitle("Ankur Prasad — Photographer × AI Engineer");
   return (
     <main id="top">
-      <Suspense fallback={<HeroPoster />}>
-        <CameraExperience />
-      </Suspense>
+      {/* If WebGL is unavailable or the 3D scene crashes, keep the static hero
+          instead of white-screening the whole home page. */}
+      <ErrorBoundary fallback={<HeroPoster />}>
+        <Suspense fallback={<HeroPoster />}>
+          <CameraExperience />
+        </Suspense>
+      </ErrorBoundary>
     </main>
   );
 }

@@ -1,0 +1,803 @@
+{
+ "finishes": [
+  {
+   "key": "print",
+   "label": "Print only",
+   "desc": "Hahnemühle Photo Rag — museum-grade cotton paper, ready to frame",
+   "type": "print",
+   "frameCm": 0,
+   "colors": [],
+   "options": {},
+   "sizes": [
+    {
+     "sku": "GLOBAL-HPR-8X8",
+     "longCm": 20,
+     "shortCm": 20,
+     "aspect": 1.0,
+     "label": "20 × 20 cm",
+     "wholesaleEUR": 11.5,
+     "retailEUR": 39
+    },
+    {
+     "sku": "GLOBAL-HPR-8X10",
+     "longCm": 25,
+     "shortCm": 20,
+     "aspect": 1.25,
+     "label": "20 × 25 cm",
+     "wholesaleEUR": 11.5,
+     "retailEUR": 39
+    },
+    {
+     "sku": "GLOBAL-HPR-8X12",
+     "longCm": 30,
+     "shortCm": 20,
+     "aspect": 1.5,
+     "label": "20 × 30 cm",
+     "wholesaleEUR": 12.5,
+     "retailEUR": 49
+    },
+    {
+     "sku": "GLOBAL-HPR-10X10",
+     "longCm": 25,
+     "shortCm": 25,
+     "aspect": 1.0,
+     "label": "25 × 25 cm",
+     "wholesaleEUR": 13.5,
+     "retailEUR": 49
+    },
+    {
+     "sku": "GLOBAL-HPR-12X12",
+     "longCm": 30,
+     "shortCm": 30,
+     "aspect": 1.0,
+     "label": "30 × 30 cm",
+     "wholesaleEUR": 15.5,
+     "retailEUR": 59
+    },
+    {
+     "sku": "GLOBAL-HPR-11X14",
+     "longCm": 36,
+     "shortCm": 28,
+     "aspect": 1.2857,
+     "label": "28 × 36 cm",
+     "wholesaleEUR": 16.75,
+     "retailEUR": 59
+    },
+    {
+     "sku": "GLOBAL-HPR-12X16",
+     "longCm": 41,
+     "shortCm": 30,
+     "aspect": 1.3667,
+     "label": "30 × 41 cm",
+     "wholesaleEUR": 18.75,
+     "retailEUR": 69
+    },
+    {
+     "sku": "GLOBAL-HPR-12X18",
+     "longCm": 46,
+     "shortCm": 30,
+     "aspect": 1.5333,
+     "label": "30 × 46 cm",
+     "wholesaleEUR": 19.75,
+     "retailEUR": 69
+    },
+    {
+     "sku": "GLOBAL-HPR-16X16",
+     "longCm": 41,
+     "shortCm": 41,
+     "aspect": 1.0,
+     "label": "41 × 41 cm",
+     "wholesaleEUR": 20.75,
+     "retailEUR": 69
+    },
+    {
+     "sku": "GLOBAL-HPR-16X20",
+     "longCm": 51,
+     "shortCm": 41,
+     "aspect": 1.2439,
+     "label": "41 × 51 cm",
+     "wholesaleEUR": 22.75,
+     "retailEUR": 79
+    },
+    {
+     "sku": "GLOBAL-HPR-16X24",
+     "longCm": 61,
+     "shortCm": 41,
+     "aspect": 1.4878,
+     "label": "41 × 61 cm",
+     "wholesaleEUR": 23.75,
+     "retailEUR": 79
+    },
+    {
+     "sku": "GLOBAL-HPR-20X20",
+     "longCm": 51,
+     "shortCm": 51,
+     "aspect": 1.0,
+     "label": "51 × 51 cm",
+     "wholesaleEUR": 26.75,
+     "retailEUR": 89
+    },
+    {
+     "sku": "GLOBAL-HPR-18X24",
+     "longCm": 61,
+     "shortCm": 46,
+     "aspect": 1.3261,
+     "label": "46 × 61 cm",
+     "wholesaleEUR": 27.75,
+     "retailEUR": 99
+    },
+    {
+     "sku": "GLOBAL-HPR-20X28",
+     "longCm": 71,
+     "shortCm": 51,
+     "aspect": 1.3922,
+     "label": "51 × 71 cm",
+     "wholesaleEUR": 33.25,
+     "retailEUR": 109
+    },
+    {
+     "sku": "GLOBAL-HPR-24X24",
+     "longCm": 61,
+     "shortCm": 61,
+     "aspect": 1.0,
+     "label": "61 × 61 cm",
+     "wholesaleEUR": 29.75,
+     "retailEUR": 99
+    },
+    {
+     "sku": "GLOBAL-HPR-20X30",
+     "longCm": 76,
+     "shortCm": 51,
+     "aspect": 1.4902,
+     "label": "51 × 76 cm",
+     "wholesaleEUR": 33.25,
+     "retailEUR": 109
+    },
+    {
+     "sku": "GLOBAL-HPR-24X32",
+     "longCm": 81,
+     "shortCm": 61,
+     "aspect": 1.3279,
+     "label": "61 × 81 cm",
+     "wholesaleEUR": 44.25,
+     "retailEUR": 149
+    },
+    {
+     "sku": "GLOBAL-HPR-24X36",
+     "longCm": 91,
+     "shortCm": 61,
+     "aspect": 1.4918,
+     "label": "61 × 91 cm",
+     "wholesaleEUR": 49.25,
+     "retailEUR": 169
+    },
+    {
+     "sku": "GLOBAL-HPR-30X30",
+     "longCm": 76,
+     "shortCm": 76,
+     "aspect": 1.0,
+     "label": "76 × 76 cm",
+     "wholesaleEUR": 50.25,
+     "retailEUR": 169
+    },
+    {
+     "sku": "GLOBAL-HPR-28X40",
+     "longCm": 102,
+     "shortCm": 71,
+     "aspect": 1.4366,
+     "label": "71 × 102 cm",
+     "wholesaleEUR": 58.25,
+     "retailEUR": 199
+    }
+   ]
+  },
+  {
+   "key": "box-frame",
+   "label": "Box framed",
+   "desc": "Deep box frame with white mount — black, white or natural wood",
+   "type": "box-frame",
+   "frameCm": 4,
+   "colors": [
+    "black",
+    "natural",
+    "white"
+   ],
+   "options": {},
+   "sizes": [
+    {
+     "sku": "GLOBAL-BOX-8X10",
+     "longCm": 25,
+     "shortCm": 20,
+     "aspect": 1.25,
+     "label": "20 × 25 cm",
+     "wholesaleEUR": 35.7,
+     "retailEUR": 119
+    },
+    {
+     "sku": "GLOBAL-BOX-8X12",
+     "longCm": 30,
+     "shortCm": 20,
+     "aspect": 1.5,
+     "label": "20 × 30 cm",
+     "wholesaleEUR": 39.7,
+     "retailEUR": 139
+    },
+    {
+     "sku": "GLOBAL-BOX-10X10",
+     "longCm": 25,
+     "shortCm": 25,
+     "aspect": 1.0,
+     "label": "25 × 25 cm",
+     "wholesaleEUR": 39.7,
+     "retailEUR": 139
+    },
+    {
+     "sku": "GLOBAL-BOX-12X12",
+     "longCm": 30,
+     "shortCm": 30,
+     "aspect": 1.0,
+     "label": "30 × 30 cm",
+     "wholesaleEUR": 41.7,
+     "retailEUR": 139
+    },
+    {
+     "sku": "GLOBAL-BOX-11X14",
+     "longCm": 36,
+     "shortCm": 28,
+     "aspect": 1.2857,
+     "label": "28 × 36 cm",
+     "wholesaleEUR": 41.7,
+     "retailEUR": 139
+    },
+    {
+     "sku": "GLOBAL-BOX-12X16",
+     "longCm": 41,
+     "shortCm": 30,
+     "aspect": 1.3667,
+     "label": "30 × 41 cm",
+     "wholesaleEUR": 43.7,
+     "retailEUR": 149
+    },
+    {
+     "sku": "GLOBAL-BOX-12X18",
+     "longCm": 46,
+     "shortCm": 30,
+     "aspect": 1.5333,
+     "label": "30 × 46 cm",
+     "wholesaleEUR": 45.7,
+     "retailEUR": 159
+    },
+    {
+     "sku": "GLOBAL-BOX-16X16",
+     "longCm": 41,
+     "shortCm": 41,
+     "aspect": 1.0,
+     "label": "41 × 41 cm",
+     "wholesaleEUR": 47.7,
+     "retailEUR": 159
+    },
+    {
+     "sku": "GLOBAL-BOX-16X20",
+     "longCm": 51,
+     "shortCm": 41,
+     "aspect": 1.2439,
+     "label": "41 × 51 cm",
+     "wholesaleEUR": 49.7,
+     "retailEUR": 169
+    },
+    {
+     "sku": "GLOBAL-BOX-16X24",
+     "longCm": 61,
+     "shortCm": 41,
+     "aspect": 1.4878,
+     "label": "41 × 61 cm",
+     "wholesaleEUR": 57.7,
+     "retailEUR": 199
+    },
+    {
+     "sku": "GLOBAL-BOX-20X20",
+     "longCm": 51,
+     "shortCm": 51,
+     "aspect": 1.0,
+     "label": "51 × 51 cm",
+     "wholesaleEUR": 57.7,
+     "retailEUR": 199
+    },
+    {
+     "sku": "GLOBAL-BOX-18X24",
+     "longCm": 61,
+     "shortCm": 46,
+     "aspect": 1.3261,
+     "label": "46 × 61 cm",
+     "wholesaleEUR": 57.7,
+     "retailEUR": 199
+    },
+    {
+     "sku": "GLOBAL-BOX-24X24",
+     "longCm": 60,
+     "shortCm": 60,
+     "aspect": 1.0,
+     "label": "60 × 60 cm",
+     "wholesaleEUR": 67.7,
+     "retailEUR": 229
+    },
+    {
+     "sku": "GLOBAL-BOX-20X28",
+     "longCm": 71,
+     "shortCm": 51,
+     "aspect": 1.3922,
+     "label": "51 × 71 cm",
+     "wholesaleEUR": 67.95,
+     "retailEUR": 229
+    },
+    {
+     "sku": "GLOBAL-BOX-20X30",
+     "longCm": 76,
+     "shortCm": 50,
+     "aspect": 1.52,
+     "label": "50 × 76 cm",
+     "wholesaleEUR": 72.95,
+     "retailEUR": 249
+    },
+    {
+     "sku": "GLOBAL-BOX-24X32",
+     "longCm": 81,
+     "shortCm": 61,
+     "aspect": 1.3279,
+     "label": "61 × 81 cm",
+     "wholesaleEUR": 77.95,
+     "retailEUR": 259
+    },
+    {
+     "sku": "GLOBAL-BOX-24X36",
+     "longCm": 91,
+     "shortCm": 61,
+     "aspect": 1.4918,
+     "label": "61 × 91 cm",
+     "wholesaleEUR": 86.95,
+     "retailEUR": 289
+    },
+    {
+     "sku": "GLOBAL-BOX-30X30",
+     "longCm": 76,
+     "shortCm": 76,
+     "aspect": 1.0,
+     "label": "76 × 76 cm",
+     "wholesaleEUR": 88.95,
+     "retailEUR": 299
+    },
+    {
+     "sku": "GLOBAL-BOX-28X40",
+     "longCm": 100,
+     "shortCm": 70,
+     "aspect": 1.4286,
+     "label": "70 × 100 cm",
+     "wholesaleEUR": 97.95,
+     "retailEUR": 329
+    },
+    {
+     "sku": "GLOBAL-BOX-28X40",
+     "longCm": 100,
+     "shortCm": 70,
+     "aspect": 1.4286,
+     "label": "70 × 100 cm",
+     "wholesaleEUR": 97.95,
+     "retailEUR": 329
+    },
+    {
+     "sku": "GLOBAL-BOX-40X40",
+     "longCm": 102,
+     "shortCm": 102,
+     "aspect": 1.0,
+     "label": "102 × 102 cm",
+     "wholesaleEUR": 122.95,
+     "retailEUR": 409
+    },
+    {
+     "sku": "GLOBAL-BOX-50X50",
+     "longCm": 127,
+     "shortCm": 127,
+     "aspect": 1.0,
+     "label": "127 × 127 cm",
+     "wholesaleEUR": 223.0,
+     "retailEUR": 739
+    }
+   ]
+  },
+  {
+   "key": "canvas",
+   "label": "Canvas",
+   "desc": "Stretched canvas, image wraps the edge, ready to hang",
+   "type": "canvas",
+   "frameCm": 2,
+   "colors": [],
+   "options": {
+    "wrap": [
+     "Black",
+     "ImageWrap",
+     "MirrorWrap",
+     "White"
+    ]
+   },
+   "sizes": [
+    {
+     "sku": "ECO-CAN-8X8",
+     "longCm": 20,
+     "shortCm": 20,
+     "aspect": 1.0,
+     "label": "20 × 20 cm",
+     "wholesaleEUR": 17.6,
+     "retailEUR": 59
+    },
+    {
+     "sku": "ECO-CAN-8X12",
+     "longCm": 30,
+     "shortCm": 20,
+     "aspect": 1.5,
+     "label": "20 × 30 cm",
+     "wholesaleEUR": 20.7,
+     "retailEUR": 69
+    },
+    {
+     "sku": "ECO-CAN-12X12",
+     "longCm": 30,
+     "shortCm": 30,
+     "aspect": 1.0,
+     "label": "30 × 30 cm",
+     "wholesaleEUR": 23.7,
+     "retailEUR": 79
+    },
+    {
+     "sku": "ECO-CAN-12X18",
+     "longCm": 46,
+     "shortCm": 30,
+     "aspect": 1.5333,
+     "label": "30 × 46 cm",
+     "wholesaleEUR": 25.7,
+     "retailEUR": 89
+    },
+    {
+     "sku": "ECO-CAN-16X16",
+     "longCm": 41,
+     "shortCm": 41,
+     "aspect": 1.0,
+     "label": "41 × 41 cm",
+     "wholesaleEUR": 28.7,
+     "retailEUR": 99
+    },
+    {
+     "sku": "ECO-CAN-16X24",
+     "longCm": 61,
+     "shortCm": 41,
+     "aspect": 1.4878,
+     "label": "41 × 61 cm",
+     "wholesaleEUR": 35.7,
+     "retailEUR": 119
+    },
+    {
+     "sku": "ECO-CAN-20X20",
+     "longCm": 51,
+     "shortCm": 51,
+     "aspect": 1.0,
+     "label": "51 × 51 cm",
+     "wholesaleEUR": 35.7,
+     "retailEUR": 119
+    },
+    {
+     "sku": "ECO-CAN-20X30",
+     "longCm": 76,
+     "shortCm": 51,
+     "aspect": 1.4902,
+     "label": "51 × 76 cm",
+     "wholesaleEUR": 44.95,
+     "retailEUR": 149
+    }
+   ]
+  },
+  {
+   "key": "framed-canvas",
+   "label": "Framed canvas",
+   "desc": "Float-framed canvas — gallery presentation in six frame colours",
+   "type": "framed-canvas",
+   "frameCm": 4,
+   "colors": [
+    "black",
+    "brown",
+    "gold",
+    "natural",
+    "silver",
+    "white"
+   ],
+   "options": {
+    "wrap": [
+     "Black",
+     "ImageWrap",
+     "MirrorWrap",
+     "White"
+    ]
+   },
+   "sizes": [
+    {
+     "sku": "ECO-FRA-CAN-8X8",
+     "longCm": 20,
+     "shortCm": 20,
+     "aspect": 1.0,
+     "label": "20 × 20 cm",
+     "wholesaleEUR": 30.6,
+     "retailEUR": 109
+    },
+    {
+     "sku": "ECO-FRA-CAN-8X12",
+     "longCm": 30,
+     "shortCm": 20,
+     "aspect": 1.5,
+     "label": "20 × 30 cm",
+     "wholesaleEUR": 33.7,
+     "retailEUR": 119
+    },
+    {
+     "sku": "ECO-FRA-CAN-12X12",
+     "longCm": 30,
+     "shortCm": 30,
+     "aspect": 1.0,
+     "label": "30 × 30 cm",
+     "wholesaleEUR": 37.7,
+     "retailEUR": 129
+    },
+    {
+     "sku": "ECO-FRA-CAN-12X18",
+     "longCm": 46,
+     "shortCm": 30,
+     "aspect": 1.5333,
+     "label": "30 × 46 cm",
+     "wholesaleEUR": 43.7,
+     "retailEUR": 149
+    },
+    {
+     "sku": "ECO-FRA-CAN-16X16",
+     "longCm": 41,
+     "shortCm": 41,
+     "aspect": 1.0,
+     "label": "41 × 41 cm",
+     "wholesaleEUR": 47.7,
+     "retailEUR": 159
+    },
+    {
+     "sku": "ECO-FRA-CAN-16X24",
+     "longCm": 61,
+     "shortCm": 41,
+     "aspect": 1.4878,
+     "label": "41 × 61 cm",
+     "wholesaleEUR": 54.7,
+     "retailEUR": 189
+    },
+    {
+     "sku": "ECO-FRA-CAN-20X20",
+     "longCm": 51,
+     "shortCm": 51,
+     "aspect": 1.0,
+     "label": "51 × 51 cm",
+     "wholesaleEUR": 54.7,
+     "retailEUR": 189
+    },
+    {
+     "sku": "ECO-FRA-CAN-20X30",
+     "longCm": 76,
+     "shortCm": 51,
+     "aspect": 1.4902,
+     "label": "51 × 76 cm",
+     "wholesaleEUR": 67.95,
+     "retailEUR": 229
+    }
+   ]
+  },
+  {
+   "key": "acrylic",
+   "label": "Acrylic",
+   "desc": "Print behind 4mm acrylic glass — vivid, frameless, modern",
+   "type": "acrylic",
+   "frameCm": 0,
+   "colors": [],
+   "options": {},
+   "sizes": [
+    {
+     "sku": "GLOBAL-MOU-ACRY-8X8",
+     "longCm": 20,
+     "shortCm": 20,
+     "aspect": 1.0,
+     "label": "20 × 20 cm",
+     "wholesaleEUR": 46.42,
+     "retailEUR": 159
+    },
+    {
+     "sku": "GLOBAL-MOU-ACRY-8X12",
+     "longCm": 30,
+     "shortCm": 20,
+     "aspect": 1.5,
+     "label": "20 × 30 cm",
+     "wholesaleEUR": 37.7,
+     "retailEUR": 129
+    },
+    {
+     "sku": "GLOBAL-MOU-ACRY-12X12",
+     "longCm": 30,
+     "shortCm": 30,
+     "aspect": 1.0,
+     "label": "30 × 30 cm",
+     "wholesaleEUR": 49.7,
+     "retailEUR": 169
+    },
+    {
+     "sku": "GLOBAL-MOU-ACRY-12X16",
+     "longCm": 41,
+     "shortCm": 30,
+     "aspect": 1.3667,
+     "label": "30 × 41 cm",
+     "wholesaleEUR": 54.7,
+     "retailEUR": 189
+    },
+    {
+     "sku": "GLOBAL-MOU-ACRY-16X24",
+     "longCm": 61,
+     "shortCm": 41,
+     "aspect": 1.4878,
+     "label": "41 × 61 cm",
+     "wholesaleEUR": 74.7,
+     "retailEUR": 249
+    },
+    {
+     "sku": "GLOBAL-MOU-ACRY-20X30",
+     "longCm": 76,
+     "shortCm": 51,
+     "aspect": 1.4902,
+     "label": "51 × 76 cm",
+     "wholesaleEUR": 97.95,
+     "retailEUR": 329
+    },
+    {
+     "sku": "GLOBAL-MOU-ACRY-16X48",
+     "longCm": 122,
+     "shortCm": 41,
+     "aspect": 2.9756,
+     "label": "41 × 122 cm",
+     "wholesaleEUR": 208.43,
+     "retailEUR": 689
+    },
+    {
+     "sku": "GLOBAL-MOU-ACRY-24X36",
+     "longCm": 91,
+     "shortCm": 61,
+     "aspect": 1.4918,
+     "label": "61 × 91 cm",
+     "wholesaleEUR": 137.95,
+     "retailEUR": 459
+    }
+   ]
+  },
+  {
+   "key": "dibond",
+   "label": "Metal (Dibond)",
+   "desc": "Aluminium composite — sleek, rigid, frameless",
+   "type": "dibond",
+   "frameCm": 0,
+   "colors": [],
+   "options": {
+    "finish": [
+     "gloss",
+     "lustre",
+     "matte"
+    ]
+   },
+   "sizes": [
+    {
+     "sku": "MOU-DI-10X46",
+     "longCm": 46,
+     "shortCm": 10,
+     "aspect": 4.6,
+     "label": "10 × 46 cm",
+     "wholesaleEUR": 54.63,
+     "retailEUR": 189
+    },
+    {
+     "sku": "MOU-DI-20X30",
+     "longCm": 30,
+     "shortCm": 20,
+     "aspect": 1.5,
+     "label": "20 × 30 cm",
+     "wholesaleEUR": 44.07,
+     "retailEUR": 149
+    },
+    {
+     "sku": "MOU-DI-30X30",
+     "longCm": 30,
+     "shortCm": 30,
+     "aspect": 1.0,
+     "label": "30 × 30 cm",
+     "wholesaleEUR": 60.5,
+     "retailEUR": 199
+    },
+    {
+     "sku": "MOU-DI-15X71",
+     "longCm": 71,
+     "shortCm": 15,
+     "aspect": 4.7333,
+     "label": "15 × 71 cm",
+     "wholesaleEUR": 73.05,
+     "retailEUR": 249
+    },
+    {
+     "sku": "MOU-DI-30X40",
+     "longCm": 40,
+     "shortCm": 30,
+     "aspect": 1.3333,
+     "label": "30 × 40 cm",
+     "wholesaleEUR": 55.81,
+     "retailEUR": 189
+    },
+    {
+     "sku": "MOU-DI-40X40",
+     "longCm": 40,
+     "shortCm": 40,
+     "aspect": 1.0,
+     "label": "40 × 40 cm",
+     "wholesaleEUR": 69.89,
+     "retailEUR": 239
+    },
+    {
+     "sku": "MOU-DI-20X97",
+     "longCm": 97,
+     "shortCm": 20,
+     "aspect": 4.85,
+     "label": "20 × 97 cm",
+     "wholesaleEUR": 92.42,
+     "retailEUR": 309
+    },
+    {
+     "sku": "MOU-DI-40X60",
+     "longCm": 60,
+     "shortCm": 40,
+     "aspect": 1.5,
+     "label": "40 × 60 cm",
+     "wholesaleEUR": 71.06,
+     "retailEUR": 239
+    },
+    {
+     "sku": "MOU-DI-50X50",
+     "longCm": 50,
+     "shortCm": 50,
+     "aspect": 1.0,
+     "label": "50 × 50 cm",
+     "wholesaleEUR": 78.1,
+     "retailEUR": 259
+    },
+    {
+     "sku": "MOU-DI-30X91",
+     "longCm": 91,
+     "shortCm": 30,
+     "aspect": 3.0333,
+     "label": "30 × 91 cm",
+     "wholesaleEUR": 96.53,
+     "retailEUR": 319
+    },
+    {
+     "sku": "MOU-DI-50X75",
+     "longCm": 75,
+     "shortCm": 50,
+     "aspect": 1.5,
+     "label": "50 × 75 cm",
+     "wholesaleEUR": 109.44,
+     "retailEUR": 369
+    },
+    {
+     "sku": "MOU-DI-60X90",
+     "longCm": 90,
+     "shortCm": 60,
+     "aspect": 1.5,
+     "label": "60 × 90 cm",
+     "wholesaleEUR": 117.65,
+     "retailEUR": 389
+    }
+   ]
+  }
+ ]
+}

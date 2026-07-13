@@ -1,15 +1,13 @@
 import { motion } from "framer-motion";
-import { galleries } from "../data/photos";
 import IntroMeta from "./IntroMeta";
 
 type Token =
   | { t: "w"; v: string; accent?: boolean }
   | { t: "img"; src: string };
 
-// inline decorative frames — serve webp directly (universally supported)
-const toWebp = (s: string) => s.replace(/\.jpe?g$/i, ".webp");
-const IMG_A = toWebp(galleries["long"]?.[0] ?? "");
-const IMG_B = toWebp(galleries["dark"]?.[0] ?? "");
+// inline decorative frames — fixed picks, served as webp (universally supported)
+const IMG_A = "/web/ANK01938.webp";
+const IMG_B = "/web/ANK01923.webp";
 
 // statement with two inline images embedded between the words (Tom Carder style)
 const TOKENS: Token[] = [
