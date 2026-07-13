@@ -639,7 +639,7 @@ export default function CameraModel({
     // the lens beat takes over. It also flips through the act-opening flipbook
     // (water → … → eye) and lands/holds on the eye at EYE_LAND_P.
     viewfinderPhotoOpacity.current = 1 - smoothstep(0.16, 0.24, p);
-    lcdImageOpacity.current = smoothstep(0.70, 0.74, p) * (1 - smoothstep(0.92, 0.95, p));
+    lcdImageOpacity.current = smoothstep(0.75, 0.79, p) * (1 - smoothstep(0.955, 0.97, p));
     if (p >= 0.10909) {
       const scrollRange = p - 0.10909;
       const rate = 120; // cycle through photos based on scroll progress rate
@@ -718,13 +718,13 @@ export default function CameraModel({
 
       // Calculate t (interpolation factor) for a quick fade-in/out at the zoom boundaries
       let t = 0;
-      if (p >= 0.815 && p <= 0.905) {
-        if (p < 0.825) {
-          // Fade in between 0.815 and 0.825
-          t = (p - 0.815) / 0.01;
-        } else if (p > 0.895) {
-          // Fade out between 0.895 and 0.905
-          t = 1 - (p - 0.895) / 0.01;
+      if (p >= 0.785 && p <= 0.96) {
+        if (p < 0.80) {
+          // Fade in between 0.785 and 0.80
+          t = (p - 0.785) / 0.015;
+        } else if (p > 0.945) {
+          // Fade out between 0.945 and 0.96
+          t = 1 - (p - 0.945) / 0.015;
         } else {
           t = 1;
         }

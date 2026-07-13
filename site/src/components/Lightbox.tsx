@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { usePhotos } from "../lib/usePhotos";
@@ -43,7 +44,10 @@ export default function Lightbox({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose, src, srcs, onNavigate]);
 
-  return (
+  // Render into <body> so `position: fixed` resolves against the viewport, not
+  // a transformed ancestor (the favorites gallery / LCD-zoom overlay both carry
+  // transforms, which would otherwise offset this fixed overlay off-screen).
+  return createPortal(
     <motion.div
       className="lightbox"
       initial={{ opacity: 0 }}
@@ -117,6 +121,7 @@ export default function Lightbox({
           </div>
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }

@@ -400,7 +400,7 @@ button {
    ============================================================ */
 .camera-act {
   position: relative;
-  height: 1200vh;          /* scroll length that scrubs the 3D timeline */
+  height: 2000vh;          /* scroll length that scrubs the 3D timeline */
 }
 .camera-stage {
   position: sticky;
@@ -591,8 +591,9 @@ button {
   /* the centered scroll hint collides with the bottom-anchored hero subtitle on
      tall phones — drop it (mobile users scroll instinctively). */
   .act-scroll-hint { display: none; }
-  /* the dashed leader labels are nowrap and clip off the viewport edge on
-     narrow screens; the act-copy card carries the same info, so drop them. */
+  /* the 3D leader-line labels project near the part and run their dashed line +
+     text off the narrow screen edges. The narration card already names the part
+     and its eye correlate, so drop the redundant leaders on phones. */
   .cam-label { display: none; }
 }
 
@@ -2508,6 +2509,13 @@ button {
   background: #08080a;
   overflow: hidden;
   will-change: transform, opacity;
+  /* hidden by default; fade in when .is-active (see the JS comment) so the
+     opaque overlay never hard-pops at the thesis/favorites boundary while the
+     grow-from-LCD transform is still catching up to the eased camera. */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.22s linear, visibility 0s linear 0.22s;
 
   --tx: calc((var(--lcd-3d-x) - 50vw) * (1 - var(--lcd-t)));
   --ty: calc((var(--lcd-3d-y) - 50vh) * (1 - var(--lcd-t)));
@@ -2516,10 +2524,14 @@ button {
 
   transform: translate3d(var(--tx), var(--ty), 0) scale(var(--sx), var(--sy));
   transform-origin: center center;
-  opacity: 1;
   border-radius: calc(12px * (1 - var(--lcd-t)));
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, calc(0.5 * (1 - var(--lcd-t))));
   border: calc(1px * (1 - var(--lcd-t))) solid rgba(237, 237, 235, calc(0.15 * (1 - var(--lcd-t))));
+}
+.lcd-zoom-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.22s linear;
 }
 .favorites-gallery-scroll-wrapper {
   position: absolute;

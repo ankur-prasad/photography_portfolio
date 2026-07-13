@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { MotionConfig } from "framer-motion";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useLenis } from "./lib/useLenis";
 import { LenisContext } from "./lib/LenisContext";
 import Cursor from "./components/Cursor";
@@ -115,6 +116,7 @@ export default function App() {
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>
+          <SpeedInsights />
         </BrowserRouter>
       </MotionConfig>
     </LenisContext.Provider>
