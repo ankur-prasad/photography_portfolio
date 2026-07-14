@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import Inquiry from "./Inquiry";
+import { OPEN_EVENT } from "./ConsentBanner";
+import { trackEvent } from "../lib/analytics";
 
 export default function Footer({ showInquiry = true }: { showInquiry?: boolean }) {
   const year = 2026;
@@ -32,15 +34,58 @@ export default function Footer({ showInquiry = true }: { showInquiry?: boolean }
             <div className="footer-col">
               <h4>Elsewhere</h4>
               <ul>
-                <li><a href="https://www.instagram.com/prasadankur11/" target="_blank" rel="noreferrer">Instagram ↗</a></li>
-                <li><a href="https://github.com/ankur-prasad" target="_blank" rel="noreferrer">GitHub ↗</a></li>
-                <li><a href="mailto:prasadankur11@gmail.com">Email ↗</a></li>
+                <li>
+                  <a
+                    href="https://www.instagram.com/prasadankur11/"
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => trackEvent("Outbound Link Clicked", { target: "instagram" })}
+                  >
+                    Instagram ↗
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/ankur-prasad"
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => trackEvent("Outbound Link Clicked", { target: "github" })}
+                  >
+                    GitHub ↗
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="mailto:prasadankur11@gmail.com"
+                    onClick={() => trackEvent("Outbound Link Clicked", { target: "email" })}
+                  >
+                    Email ↗
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
 
           <div className="footer-base">
-            <span>© {year} Ankur Prasad — All frames are mine</span>
+            <span>
+              © {year} Ankur Prasad — All frames are mine
+              {" · "}
+              <Link to="/privacy" className="footer-legal-link">Privacy</Link>
+              {" · "}
+              <Link to="/terms" className="footer-legal-link">Terms</Link>
+              {" · "}
+              <Link to="/impressum" className="footer-legal-link">Impressum</Link>
+              {" · "}
+              <Link to="/datenschutz" className="footer-legal-link">Datenschutz</Link>
+              {" · "}
+              <button
+                type="button"
+                className="footer-legal-link footer-legal-btn"
+                onClick={() => window.dispatchEvent(new Event(OPEN_EVENT))}
+              >
+                Privacy settings
+              </button>
+            </span>
             <span className="rec">
               <span className="dot" />
               Designed &amp; built from scratch · Munich
