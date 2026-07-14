@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { joinWaitlist } from "../lib/waitlist";
+import { trackEvent } from "../lib/analytics";
 
 export default function PrintWaitlist() {
   const [email, setEmail] = useState("");
@@ -15,6 +17,7 @@ export default function PrintWaitlist() {
     setStatus("sending");
     const res = await joinWaitlist(email);
     setStatus(res.ok ? "sent" : "error");
+    if (res.ok) trackEvent("Waitlist Joined");
   }
 
   if (status === "sent") {
@@ -56,6 +59,9 @@ export default function PrintWaitlist() {
       {status === "error" && (
         <p className="waitlist-err">Couldn&apos;t add you — try again, or email me directly.</p>
       )}
+      <p className="form-consent">
+        By joining, you agree to the <Link to="/privacy">Privacy Policy</Link>.
+      </p>
     </form>
   );
 }

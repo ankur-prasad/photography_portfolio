@@ -8,6 +8,7 @@ import Loader from "./components/Loader";
 import Nav from "./components/Nav";
 import Hud from "./components/Hud";
 import ScrollManager from "./components/ScrollManager";
+import ConsentBanner from "./components/ConsentBanner";
 
 // Route + dev-tool code-splitting: three.js / R3F (~1.4MB) is only pulled into
 // the chunks that actually render 3D (home's CameraExperience, the lab, and the
@@ -19,6 +20,11 @@ const ServicesPage = lazy(() => import("./pages/ServicesPage"));
 const PrintsPage = lazy(() => import("./pages/PrintsPage"));
 const LabPage = lazy(() => import("./pages/LabPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const ImpressumPage = lazy(() => import("./pages/LegalPage").then((m) => ({ default: m.ImpressumPage })));
+const DatenschutzPage = lazy(() => import("./pages/LegalPage").then((m) => ({ default: m.DatenschutzPage })));
+const PrivacyPolicyPage = lazy(() => import("./pages/LegalPage").then((m) => ({ default: m.PrivacyPolicyPage })));
+const TermsPage = lazy(() => import("./pages/LegalPage").then((m) => ({ default: m.TermsPage })));
+const NutzungsbedingungenPage = lazy(() => import("./pages/LegalPage").then((m) => ({ default: m.NutzungsbedingungenPage })));
 const ModelInspector = lazy(() => import("./components/ModelInspector"));
 const AssetLab = lazy(() => import("./components/AssetLab"));
 
@@ -56,6 +62,7 @@ export default function App() {
           <ScrollManager />
           <HudOnHome />
           <Nav />
+          <ConsentBanner />
           <Suspense fallback={null}>
             <Routes>
               <Route path="/" element={<HomePage />} />
@@ -65,6 +72,11 @@ export default function App() {
               <Route path="/prints" element={<PrintsPage />} />
               <Route path="/lab" element={<LabPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/impressum" element={<ImpressumPage />} />
+              <Route path="/datenschutz" element={<DatenschutzPage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/nutzungsbedingungen" element={<NutzungsbedingungenPage />} />
             </Routes>
           </Suspense>
         </BrowserRouter>
