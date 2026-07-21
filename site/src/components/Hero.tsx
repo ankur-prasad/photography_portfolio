@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import DepthScene from "./DepthScene";
 import { heroes } from "../data/photos";
+import { heroSource } from "../lib/media";
 
 const heroShot = heroes.find((h) => h.id === "0961") ?? heroes[0];
 
@@ -29,7 +30,7 @@ export default function Hero() {
   return (
     <header className="hero" id="top" ref={ref}>
       <motion.div className="hero-canvas" style={{ scale: canvasScale, y: canvasY }}>
-        <DepthScene photo={heroShot.photo} depth={heroShot.depth} strength={0.05} />
+        <DepthScene photo={heroSource(heroShot)} depth={heroShot.depth} strength={0.05} />
       </motion.div>
       <div className="hero-veil" />
       <motion.div className="hero-copy" style={{ y: copyY, opacity: copyOpacity }}>
