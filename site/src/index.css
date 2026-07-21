@@ -954,6 +954,91 @@ button {
   animation: hud-pulse 1.6s ease-in-out infinite;
 }
 
+/* ============================================================
+   Legal pages (Impressum / Datenschutz / Privacy / Terms)
+   ============================================================ */
+.legal-sec { padding: clamp(110px, 18vh, 180px) 0 clamp(60px, 10vh, 100px); }
+.legal h1 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4.6vw, 56px);
+  font-weight: 500;
+  margin: 14px 0 30px;
+}
+.legal h2 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 32px 0 10px;
+}
+.legal p { color: var(--muted); line-height: 1.7; max-width: 68ch; }
+.legal a { color: var(--fg); }
+.footer-legal-link { color: inherit; text-decoration: none; }
+.footer-legal-link:hover { color: var(--accent); }
+.footer-legal-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Opt-in privacy/analytics consent banner */
+.consent-notice {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  margin: 0 auto;
+  max-width: 640px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: var(--bg-soft);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.consent-notice-text {
+  margin: 0;
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.consent-notice-text .footer-legal-link { color: var(--fg); border-bottom: 1px solid var(--accent-dim); }
+.consent-notice-actions { display: flex; gap: 8px; flex: none; }
+.consent-notice-btn {
+  padding: 7px 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.consent-notice-btn:hover { opacity: 0.9; }
+.consent-notice-btn.ghost {
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid var(--line);
+}
+.consent-notice-btn.ghost:hover { border-color: var(--accent-dim); opacity: 1; }
+@media (max-width: 560px) {
+  .consent-notice { flex-direction: column; align-items: stretch; gap: 12px; text-align: center; }
+  .consent-notice-actions { justify-content: center; }
+}
+
+/* Small fine-print line under Inquiry / PrintWaitlist submit buttons */
+.form-consent { margin-top: 14px; font-size: 12px; color: var(--muted); }
+.form-consent a { color: var(--fg); border-bottom: 1px solid var(--accent-dim); }
+.form-consent a:hover { color: var(--accent); }
+
 @media (max-width: 860px) {
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .footer-mark { grid-column: 1 / -1; margin-bottom: 12px; }

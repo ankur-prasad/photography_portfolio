@@ -1,4 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
+import { trackEvent } from "../lib/analytics";
 
 export default function Nav() {
   return (
@@ -12,7 +13,14 @@ export default function Nav() {
           <NavLink to="/prints">Prints</NavLink>
           <NavLink to="/about">About</NavLink>
           <NavLink to="/services">Services</NavLink>
-          <Link className="nav-cta" to="/contact" data-cursor="email">Work with me</Link>
+          <Link
+            className="nav-cta"
+            to="/contact"
+            data-cursor="email"
+            onClick={() => trackEvent("Nav CTA Clicked")}
+          >
+            Work with me
+          </Link>
         </div>
       </div>
     </nav>

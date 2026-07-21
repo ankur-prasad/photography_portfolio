@@ -78,22 +78,23 @@ export function DatenschutzPage() {
 
           <h2>3. Cookies</h2>
           <p>
-            Diese Website setzt keine Tracking-Cookies und keine Cookies von
-            Drittanbietern. Verwendet wird ausschließlich technisch notwendiger
-            Browser-Speicher (z.&nbsp;B. um die Intro-Animation pro Sitzung nur
-            einmal abzuspielen); dabei werden keine personenbezogenen Daten
-            verarbeitet. Aus diesem Grund ist kein Cookie-Einwilligungsbanner
-            erforderlich.
+            Diese Website setzt keine Cookies von Drittanbietern ohne Ihre
+            Einwilligung. Technisch notwendiger Browser-Speicher (z.&nbsp;B. um die
+            Intro-Animation pro Sitzung nur einmal abzuspielen) enthält keine
+            personenbezogenen Daten.
           </p>
 
           <h2>4. Webanalyse</h2>
           <p>
             Diese Website nutzt Plausible Analytics, einen datenschutzfreundlichen
-            Analysedienst ohne Cookies. Es werden keine personenbezogenen Daten
-            gespeichert, keine geräteübergreifenden Profile erstellt und keine
-            Daten an Werbenetzwerke weitergegeben. Rechtsgrundlage ist Art. 6
-            Abs. 1 lit. f DSGVO (berechtigtes Interesse an der reichweitenbezogenen
-            Auswertung des Angebots).
+            Analysedienst ohne Cookies, um zu verstehen, welche Seiten und Fotos
+            Besucher interessieren (Seitenaufrufe sowie einzelne Interaktionen wie
+            das Absenden des Anfrageformulars). Plausible speichert keine
+            personenbezogenen Daten, erstellt keine geräteübergreifenden Profile
+            und gibt keine Daten an Werbenetzwerke weiter. Die Analyse startet erst,
+            nachdem Sie im Einwilligungsbanner zugestimmt haben (Art. 6 Abs. 1 lit.
+            a DSGVO); Sie können Ihre Zustimmung jederzeit über den Link
+            &bdquo;Datenschutz-Einstellungen&ldquo; im Footer widerrufen.
           </p>
 
           <h2>5. Schriftarten</h2>
@@ -132,7 +133,10 @@ export function DatenschutzPage() {
 }
 
 export function PrivacyPolicyPage() {
-  usePageTitle("Privacy Policy — Ankur Prasad", "How this site handles your data: cookieless analytics, EU-hosted forms, self-hosted fonts, and your GDPR rights.");
+  usePageTitle(
+    "Privacy Policy — Ankur Prasad",
+    "How this site handles your data: opt-in cookieless analytics, EU-hosted forms, self-hosted fonts, and your GDPR rights."
+  );
   return (
     <main className="page legal">
       <section className="legal-sec">
@@ -141,9 +145,9 @@ export function PrivacyPolicyPage() {
           <h1>Privacy Policy</h1>
           <p>
             This site is built to respect your privacy: no tracking cookies, no
-            advertising networks, no third-party font CDNs. Below is exactly what
-            is collected, why, and what rights you have. A German-language version
-            is available as the{" "}
+            advertising networks, no third-party font CDNs, and analytics that only
+            runs if you say yes. Below is exactly what is collected, why, and what
+            rights you have. A German-language version is available as the{" "}
             <Link to="/datenschutz" className="footer-legal-link">Datenschutzerklärung</Link>.
           </p>
 
@@ -169,21 +173,22 @@ export function PrivacyPolicyPage() {
 
           <h2>3. Cookies &amp; storage</h2>
           <p>
-            This site sets no tracking cookies and no third-party cookies. It uses
-            only functional browser storage — for example, remembering that the
-            intro animation has already played this session, or preserving your
-            edits in the developer sandbox. None of this contains personal data or
-            is shared. Because there is no tracking, no cookie-consent gate is
-            required.
+            This site sets no third-party cookies without your consent. It uses
+            functional browser storage for things like remembering that the intro
+            animation already played this session — that never contains personal
+            data.
           </p>
 
-          <h2>4. Analytics</h2>
+          <h2>4. Analytics — opt-in</h2>
           <p>
-            Where analytics is enabled, this site uses Plausible Analytics — a
-            privacy-friendly service that sets no cookies, collects no personal
-            data, and builds no cross-device profiles. Only aggregate page-view
-            counts are recorded. Legal basis: Art. 6(1)(f) GDPR (legitimate
-            interest in understanding reach).
+            This site uses Plausible Analytics, a privacy-friendly service that
+            sets no cookies and builds no cross-device profiles. When you accept
+            the consent banner, it records aggregate page views and a small set of
+            named interaction events (for example, “Inquiry Submitted” or
+            “Waitlist Joined”) so I can see which pages and offers resonate — never
+            your name, email or message content. Analytics only starts after you
+            accept, and you can change your mind at any time via “Privacy
+            settings” in the footer. Legal basis: Art. 6(1)(a) GDPR (consent).
           </p>
 
           <h2>5. Fonts</h2>
@@ -220,7 +225,10 @@ export function PrivacyPolicyPage() {
 }
 
 export function TermsPage() {
-  usePageTitle("Terms of Service — Ankur Prasad", "The terms for using this website: copyright, permitted use, inquiries, prints, and liability.");
+  usePageTitle(
+    "Terms of Service — Ankur Prasad",
+    "The terms for using this website: copyright, permitted use, inquiries, prints, and liability."
+  );
   return (
     <main className="page legal">
       <section className="legal-sec">

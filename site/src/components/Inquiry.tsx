@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { submitInquiry, CONTACT_EMAIL, type Inquiry as InquiryData } from "../lib/inquiry";
 import { usePhotos } from "../lib/usePhotos";
+import { trackEvent } from "../lib/analytics";
 
 const PROJECT_TYPES = ["Photography", "Web experience", "AI consulting", "Something else"];
 const BUDGETS = ["< €2k", "€2k–5k", "€5k–15k", "€15k+", "Not sure yet"];
@@ -63,6 +64,7 @@ export default function Inquiry() {
     const res = await submitInquiry(data);
     if (res.ok) {
       setStatus("sent");
+      trackEvent("Inquiry Submitted", { projectType: data.projectType });
     } else {
       setStatus("error");
       setError(res.error);
