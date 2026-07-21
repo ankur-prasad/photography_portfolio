@@ -189,6 +189,29 @@
      "wholesaleEUR": 58.25,
      "retailEUR": 199
     }
+   ],
+   "countries": [
+    "DE",
+    "AT",
+    "CH",
+    "FR",
+    "IT",
+    "ES",
+    "NL",
+    "BE",
+    "LU",
+    "GB",
+    "IE",
+    "US",
+    "CA",
+    "AU",
+    "NZ",
+    "SE",
+    "DK",
+    "NO",
+    "FI",
+    "PL",
+    "PT"
    ]
   },
   {
@@ -376,15 +399,6 @@
      "retailEUR": 329
     },
     {
-     "sku": "GLOBAL-BOX-28X40",
-     "longCm": 100,
-     "shortCm": 70,
-     "aspect": 1.4286,
-     "label": "70 × 100 cm",
-     "wholesaleEUR": 97.95,
-     "retailEUR": 329
-    },
-    {
      "sku": "GLOBAL-BOX-40X40",
      "longCm": 102,
      "shortCm": 102,
@@ -402,6 +416,29 @@
      "wholesaleEUR": 223.0,
      "retailEUR": 739
     }
+   ],
+   "countries": [
+    "DE",
+    "AT",
+    "CH",
+    "FR",
+    "IT",
+    "ES",
+    "NL",
+    "BE",
+    "LU",
+    "GB",
+    "IE",
+    "US",
+    "CA",
+    "AU",
+    "NZ",
+    "SE",
+    "DK",
+    "NO",
+    "FI",
+    "PL",
+    "PT"
    ]
   },
   {
@@ -492,6 +529,29 @@
      "wholesaleEUR": 44.95,
      "retailEUR": 149
     }
+   ],
+   "countries": [
+    "DE",
+    "AT",
+    "CH",
+    "FR",
+    "IT",
+    "ES",
+    "NL",
+    "BE",
+    "LU",
+    "GB",
+    "IE",
+    "US",
+    "CA",
+    "AU",
+    "NZ",
+    "SE",
+    "DK",
+    "NO",
+    "FI",
+    "PL",
+    "PT"
    ]
   },
   {
@@ -589,6 +649,29 @@
      "wholesaleEUR": 67.95,
      "retailEUR": 229
     }
+   ],
+   "countries": [
+    "DE",
+    "AT",
+    "CH",
+    "FR",
+    "IT",
+    "ES",
+    "NL",
+    "BE",
+    "LU",
+    "GB",
+    "IE",
+    "US",
+    "CA",
+    "AU",
+    "NZ",
+    "SE",
+    "DK",
+    "NO",
+    "FI",
+    "PL",
+    "PT"
    ]
   },
   {
@@ -606,7 +689,7 @@
      "shortCm": 20,
      "aspect": 1.0,
      "label": "20 × 20 cm",
-     "wholesaleEUR": 46.42,
+     "wholesaleEUR": 46.38,
      "retailEUR": 159
     },
     {
@@ -660,7 +743,7 @@
      "shortCm": 41,
      "aspect": 2.9756,
      "label": "41 × 122 cm",
-     "wholesaleEUR": 208.43,
+     "wholesaleEUR": 208.29,
      "retailEUR": 689
     },
     {
@@ -672,6 +755,29 @@
      "wholesaleEUR": 137.95,
      "retailEUR": 459
     }
+   ],
+   "countries": [
+    "DE",
+    "AT",
+    "CH",
+    "FR",
+    "IT",
+    "ES",
+    "NL",
+    "BE",
+    "LU",
+    "GB",
+    "IE",
+    "US",
+    "CA",
+    "AU",
+    "NZ",
+    "SE",
+    "DK",
+    "NO",
+    "FI",
+    "PL",
+    "PT"
    ]
   },
   {
@@ -695,7 +801,7 @@
      "shortCm": 10,
      "aspect": 4.6,
      "label": "10 × 46 cm",
-     "wholesaleEUR": 54.63,
+     "wholesaleEUR": 54.59,
      "retailEUR": 189
     },
     {
@@ -704,7 +810,7 @@
      "shortCm": 20,
      "aspect": 1.5,
      "label": "20 × 30 cm",
-     "wholesaleEUR": 44.07,
+     "wholesaleEUR": 44.04,
      "retailEUR": 149
     },
     {
@@ -713,7 +819,7 @@
      "shortCm": 30,
      "aspect": 1.0,
      "label": "30 × 30 cm",
-     "wholesaleEUR": 60.5,
+     "wholesaleEUR": 60.45,
      "retailEUR": 199
     },
     {
@@ -722,7 +828,7 @@
      "shortCm": 15,
      "aspect": 4.7333,
      "label": "15 × 71 cm",
-     "wholesaleEUR": 73.05,
+     "wholesaleEUR": 72.99,
      "retailEUR": 249
     },
     {
@@ -731,7 +837,7 @@
      "shortCm": 30,
      "aspect": 1.3333,
      "label": "30 × 40 cm",
-     "wholesaleEUR": 55.81,
+     "wholesaleEUR": 55.76,
      "retailEUR": 189
     },
     {
@@ -740,7 +846,7 @@
      "shortCm": 40,
      "aspect": 1.0,
      "label": "40 × 40 cm",
-     "wholesaleEUR": 69.89,
+     "wholesaleEUR": 69.84,
      "retailEUR": 239
     },
     {
@@ -749,7 +855,7 @@
      "shortCm": 20,
      "aspect": 4.85,
      "label": "20 × 97 cm",
-     "wholesaleEUR": 92.42,
+     "wholesaleEUR": 92.34,
      "retailEUR": 309
     },
     {
@@ -758,7 +864,7 @@
      "shortCm": 40,
      "aspect": 1.5,
      "label": "40 × 60 cm",
-     "wholesaleEUR": 71.06,
+     "wholesaleEUR": 71.01,
      "retailEUR": 239
     },
     {
@@ -767,7 +873,7 @@
      "shortCm": 50,
      "aspect": 1.0,
      "label": "50 × 50 cm",
-     "wholesaleEUR": 78.1,
+     "wholesaleEUR": 78.05,
      "retailEUR": 259
     },
     {
@@ -776,7 +882,7 @@
      "shortCm": 30,
      "aspect": 3.0333,
      "label": "30 × 91 cm",
-     "wholesaleEUR": 96.53,
+     "wholesaleEUR": 96.44,
      "retailEUR": 319
     },
     {
@@ -785,7 +891,7 @@
      "shortCm": 50,
      "aspect": 1.5,
      "label": "50 × 75 cm",
-     "wholesaleEUR": 109.44,
+     "wholesaleEUR": 109.37,
      "retailEUR": 369
     },
     {
@@ -794,9 +900,32 @@
      "shortCm": 60,
      "aspect": 1.5,
      "label": "60 × 90 cm",
-     "wholesaleEUR": 117.65,
+     "wholesaleEUR": 117.57,
      "retailEUR": 389
     }
+   ],
+   "countries": [
+    "DE",
+    "AT",
+    "CH",
+    "FR",
+    "IT",
+    "ES",
+    "NL",
+    "BE",
+    "LU",
+    "GB",
+    "IE",
+    "US",
+    "CA",
+    "AU",
+    "NZ",
+    "SE",
+    "DK",
+    "NO",
+    "FI",
+    "PL",
+    "PT"
    ]
   }
  ]

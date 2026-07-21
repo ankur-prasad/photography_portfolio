@@ -2,3 +2,4 @@
 
 # Full-resolution photo originals (640MB+) — source of truth lives outside git
 assets/originals/
+tools/__pycache__/

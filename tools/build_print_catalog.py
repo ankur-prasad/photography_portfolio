@@ -79,7 +79,7 @@ FAMILIES = [
          frameCm=0, sizes=RECT + SQ),
     dict(key="box-frame", label="Box framed", type="box-frame", prefix="GLOBAL-BOX",
          desc="Deep box frame with white mount — black, white or natural wood",
-         frameCm=4, sizes=RECT + SQ + ["28X40", "40X40", "50X50"]),
+         frameCm=4, sizes=RECT + SQ + ["40X40", "50X50"]),
     dict(key="canvas", label="Canvas", type="canvas", prefix="ECO-CAN",
          desc="Stretched canvas, image wraps the edge, ready to hang",
          frameCm=2, sizes=RECT + SQ),
@@ -109,7 +109,7 @@ catalog = []
 for fam in FAMILIES:
     entry = dict(key=fam["key"], label=fam["label"], desc=fam["desc"],
                  type=fam["type"], frameCm=fam["frameCm"], colors=[], options={}, sizes=[])
-    for token in fam["sizes"]:
+    for token in dict.fromkeys(fam["sizes"]):  # dedupe, preserve order
         sku = f"{fam['prefix']}-{token}"
         s, d = call("GET", f"/products/{sku}")
         if s != 200:

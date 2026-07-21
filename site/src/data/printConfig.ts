@@ -24,6 +24,10 @@ export interface CatalogFinish {
   colors: string[];
   options: Record<string, string[]>;
   sizes: CatalogSize[];
+  /** ISO country codes Prodigi has confirmed deliverable for this finish
+   *  (tools/check_country_availability.py) — used to restrict Stripe's
+   *  shipping-country picker per finish at checkout time. */
+  countries?: string[];
 }
 
 export interface PrintCatalog {

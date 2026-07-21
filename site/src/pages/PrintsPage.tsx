@@ -5,7 +5,6 @@ import { usePageTitle } from "../lib/usePageTitle";
 import { usePhotos } from "../lib/usePhotos";
 import Photo from "../components/Photo";
 import PrintShop from "../components/PrintShop";
-import BooksTeaser from "../components/BooksTeaser";
 import PrintWaitlist from "../components/PrintWaitlist";
 import Footer from "../components/Footer";
 
@@ -35,6 +34,7 @@ export default function PrintsPage() {
     "Limited-edition archival prints by Ankur Prasad — see them on your wall at true scale. Framed, canvas or print only, shipped worldwide."
   );
   const [params] = useSearchParams();
+  const orderSuccess = params.get("order") === "success";
   // ?photo=<stem> deep link (from the lightbox) — any photo is printable, even
   // ones outside the curated PICKS; those just join the strip up front.
   const q = params.get("photo");
@@ -50,6 +50,16 @@ export default function PrintsPage() {
 
   return (
     <main className="page prints">
+      {orderSuccess && (
+        <div className="order-success" role="status">
+          <div className="container">
+            <p>
+              <strong>Order received — thank you.</strong> A confirmation is on its way to your
+              inbox. I sign and number every print myself before it ships.
+            </p>
+          </div>
+        </div>
+      )}
       <section className="prints-hero">
         <div className="container">
           <motion.p className="eyebrow" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }}
@@ -76,7 +86,7 @@ export default function PrintsPage() {
             <div>
               <p className="eyebrow">// First access</p>
               <p className="prints-waitlist-lede">
-                Direct checkout is coming online. Join the list — launch gets founder pricing.
+                Want first look at new frames as the archive grows? Join the list.
               </p>
               <PrintWaitlist />
             </div>
@@ -91,8 +101,6 @@ export default function PrintsPage() {
           </div>
         </div>
       </section>
-
-      <BooksTeaser />
 
       <section className="prints-grid-sec">
         <div className="container">

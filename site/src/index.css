@@ -1643,6 +1643,15 @@ button {
 }
 .prints-includes dd { font-size: 14.5px; color: var(--muted); line-height: 1.45; }
 
+.order-success {
+  padding: 18px 0;
+  background: rgba(240, 136, 62, 0.1);
+  border-bottom: 1px solid var(--accent-dim);
+  text-align: center;
+}
+.order-success p { font-size: 14px; color: var(--fg); }
+.order-success strong { color: var(--accent); }
+
 /* ============================================================
    PRINT SHOP  (in-room configurator)
    ============================================================ */
@@ -1835,12 +1844,17 @@ button {
   text-transform: uppercase;
   color: var(--bg);
   background: var(--accent);
+  border: none;
   border-radius: 4px;
   padding: 16px 30px;
-  transition: transform 0.3s;
+  cursor: pointer;
+  transition: transform 0.3s, opacity 0.3s;
 }
-.shop-cta:hover { transform: translateY(-2px); }
+.shop-cta:hover:not(:disabled) { transform: translateY(-2px); }
+.shop-cta:disabled { opacity: 0.6; cursor: wait; }
 .shop-cta-note { margin-top: 12px; font-size: 12.5px; color: var(--muted); max-width: 44ch; }
+.shop-cta-note.error { color: var(--accent); }
+.shop-cta-note.error a { color: inherit; text-decoration: underline; }
 
 /* ---- photo strip ---- */
 .shop-strip {
@@ -1868,91 +1882,6 @@ button {
 .strip-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .strip-thumb:hover { opacity: 0.85; }
 .strip-thumb.active { opacity: 1; outline-color: var(--accent); }
-
-/* ---- travel books teaser ---- */
-.books { padding-top: clamp(60px, 10vh, 110px); }
-.books-title {
-  margin-top: 14px;
-  font-size: clamp(30px, 4.5vw, 56px);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-}
-.books-lede { margin-top: 16px; color: var(--muted); font-size: 15.5px; max-width: 52ch; }
-.books-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(22px, 3vw, 44px);
-  margin-top: clamp(30px, 4.5vh, 50px);
-}
-.book-card {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: clamp(18px, 2.4vw, 30px);
-  align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: clamp(20px, 2.4vw, 30px);
-  background: var(--bg-soft);
-}
-.book-cover {
-  position: relative;
-  aspect-ratio: 3 / 4;
-  border-radius: 2px 6px 6px 2px;
-  overflow: hidden;
-  box-shadow: 10px 12px 26px rgba(0, 0, 0, 0.5);
-}
-.book-cover img { width: 100%; height: 100%; object-fit: cover; }
-.book-spine {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 9px;
-  background: linear-gradient(90deg, rgba(0,0,0,0.65), rgba(0,0,0,0) 90%);
-}
-.book-title { font-size: clamp(22px, 2.4vw, 30px); font-weight: 400; }
-.book-blurb { margin-top: 8px; color: var(--muted); font-size: 14px; line-height: 1.5; }
-.book-status {
-  margin-top: 12px;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-.book-notify { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
-.book-notify input {
-  flex: 1 1 150px;
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--fg);
-  background: transparent;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 10px 12px;
-  transition: border-color 0.3s;
-}
-.book-notify input:focus { outline: none; border-color: var(--accent); }
-.book-notify input::placeholder { color: rgba(138, 138, 144, 0.5); }
-.book-notify button {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--bg);
-  background: var(--accent);
-  border-radius: 4px;
-  padding: 10px 16px;
-}
-.book-notify button:disabled { opacity: 0.4; cursor: not-allowed; }
-.book-sent { margin-top: 16px; font-size: 13.5px; color: var(--fg); }
-.book-err { font-family: var(--font-mono); font-size: 11px; color: var(--accent); align-self: center; }
-
-@media (max-width: 900px) {
-  .books-grid { grid-template-columns: 1fr; }
-}
-@media (max-width: 520px) {
-  .book-card { grid-template-columns: 1fr; }
-  .book-cover { max-width: 220px; }
-}
 
 .prints-meta-sec { padding-top: clamp(50px, 8vh, 90px); }
 .prints-waitlist-lede { margin: 14px 0 22px; color: var(--muted); font-size: 15.5px; max-width: 44ch; }

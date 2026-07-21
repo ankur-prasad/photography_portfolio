@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { usePhotos } from "../lib/usePhotos";
 import { usePrintCatalog } from "../lib/usePrintCatalog";
 import { bestSizes, dimsFor, COLOR_HEX } from "../data/printConfig";
+import { createCheckout } from "../lib/checkout";
 import RoomPreview from "./RoomPreview";
 
 const stemOf = (src: string) => src.split("/").pop()?.replace(/\.\w+$/, "") ?? "";
@@ -35,6 +36,8 @@ export default function PrintShop({
   const [colorChoice, setColorChoice] = useState<string | null>(null);
   const [optChoice, setOptChoice] = useState<string | null>(null);
   const [aspect, setAspect] = useState(1.5);
+  const [buying, setBuying] = useState(false);
+  const [buyError, setBuyError] = useState<string | null>(null);
 
   const finish = finishes.find((f) => f.key === finishKey) ?? finishes[0];
   if (!finish) {
@@ -59,6 +62,22 @@ export default function PrintShop({
     `&finish=${encodeURIComponent(finish.label + (color ? ` (${color})` : ""))}` +
     (opt ? `&option=${encodeURIComponent(opt)}` : "") +
     `&sku=${encodeURIComponent(size.sku)}`;
+
+  async function onBuy() {
+    setBuying(true);
+    setBuyError(null);
+    const res = await createCheckout({
+      photo: id, sku: size.sku, title: m.title,
+      color: finish.colors.length > 1 ? color : undefined,
+      option: optValues.length > 1 ? opt : undefined,
+    });
+    if (res.ok) {
+      window.location.href = res.url;
+      return; // navigating away
+    }
+    setBuyError(res.error);
+    setBuying(false);
+  }
 
   return (
     <section className="print-shop" id="configure">
@@ -160,13 +179,19 @@ export default function PrintShop({
                   {size.crop !== "none" && " · slight crop to fit"}
                 </span>
               </div>
-              <Link className="shop-cta" to={inquiryHref} data-cursor="email">
-                Order this print →
-              </Link>
-              <p className="shop-cta-note">
-                Orders currently go through a short note to me — direct checkout is coming
-                online. Waitlist members get founder pricing.
-              </p>
+              <button className="shop-cta" onClick={onBuy} disabled={buying} data-cursor="email">
+                {buying ? "Redirecting to checkout…" : "Order this print →"}
+              </button>
+              {buyError ? (
+                <p className="shop-cta-note error">
+                  Checkout&apos;s briefly unavailable ({buyError}). You can still{" "}
+                  <Link to={inquiryHref}>send me the order directly →</Link>
+                </p>
+              ) : (
+                <p className="shop-cta-note">
+                  Secure checkout via Stripe · signed &amp; numbered · ships worldwide.
+                </p>
+              )}
             </div>
           </div>
         </div>
