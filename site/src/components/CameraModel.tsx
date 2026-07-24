@@ -617,8 +617,11 @@ export default function CameraModel({
     setOpacity(M.irisGlow, lensVis);
     setOpacity(M.irisFrame, lensVis);
     setOpacity(M.irisBlade, lensVis);
-    // cap-cover is ALWAYS on so the body cap is never seen
-    setOpacity(M.cap, 1);
+    // cap-cover hides the body cap whenever the sensor isn't the thing on
+    // display — it now sits forward of the sensor plane (nudged there to
+    // clear the real scanned body-cap decal, see PLACEMENT.capCover), so it
+    // has to fade out as the sensor fades in or it'd permanently occlude it.
+    setOpacity(M.cap, 1 - sensorVis);
     setOpacity(M.well, 0.4 + 0.6 * mountOpen);
     setOpacity(M.sensorRim, sensorVis);
     setOpacity(M.sensor, sensorVis);

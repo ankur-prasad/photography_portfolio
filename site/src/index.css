@@ -231,6 +231,67 @@ button {
 }
 .loader-status b { color: var(--accent); font-weight: 400; }
 
+.loader-brackets {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.loader-bracket {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--accent-dim);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.loader-bracket.tl { top: 40px; left: 40px; border-right: 0; border-bottom: 0; }
+.loader-bracket.tr { top: 40px; right: 40px; border-left: 0; border-bottom: 0; }
+.loader-bracket.bl { bottom: 40px; left: 40px; border-right: 0; border-top: 0; }
+.loader-bracket.br { bottom: 40px; right: 40px; border-left: 0; border-top: 0; }
+
+/* center focus reticle — tightens onto the wordmark as it racks into focus */
+.loader-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 96px;
+  height: 96px;
+  z-index: 1;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+}
+.loader-reticle span {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--accent-dim);
+}
+.loader-reticle .a { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.loader-reticle .b { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.loader-reticle .c { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.loader-reticle .d { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+.loader-reticle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* shutter-click flash at 100% before the iris wipe */
+.loader-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: var(--fg);
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
 /* ============================================================
    NAV
    ============================================================ */

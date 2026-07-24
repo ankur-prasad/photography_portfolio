@@ -43,9 +43,15 @@ export const LENS = {
 export const PLACEMENT: Record<string, { position: Vec3; rotation: Vec3; scale: Vec3 }> = {
   body: { position: [0, 0, -0.403], rotation: [0, 0.268, 0], scale: [1, 1, 1] },
   lens: { position: [0.209, -0.109, 0.469], rotation: [-0.012, 0.001, -0.007], scale: [1.264, 1.264, 1.264] },
-  capCover: { position: [0.209, -0.109, -0.012], rotation: [-0.012, 0.001, -0.007], scale: [0.781, 0.781, 3.022] },
+  /* z nudged forward (was -0.012) — the built plate sat behind the real
+     scanned body cap decal it's meant to hide, so the decal won the depth
+     test and showed through as a ghost logo. */
+  capCover: { position: [0.209, -0.109, 0.03], rotation: [-0.012, 0.001, -0.007], scale: [0.781, 0.781, 3.022] },
   sensor: { position: [0.209, -0.109, -0.009], rotation: [-0.012, 0.001, -0.007], scale: [0.97, 0.97, 0.97] },
-  shutter: { position: [0.209, -0.109, 0.011], rotation: [-0.012, 0.001, -0.007], scale: [1.039, 1.069, 1.036] },
+  /* z nudged forward (was 0.011) — that sat behind the open-mount plane
+     (ANCHOR.mount.z = 0.02), clipping into the body's scanned mount cavity
+     and z-fighting (flickering dark patches during the shutter beat). */
+  shutter: { position: [0.209, -0.109, 0.05], rotation: [-0.012, 0.001, -0.007], scale: [1.039, 1.069, 1.036] },
   iris: { position: [0.209, -0.109, 0.999], rotation: [-0.012, 0.001, -0.007], scale: [0.6, 0.6, 0.6] },
   /* flat rectangle marking where the real hero photo lives — a unit (1×1)
      plane, so scale.x/scale.y double as its width/height in world units.
