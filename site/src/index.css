@@ -461,7 +461,7 @@ button {
    ============================================================ */
 .camera-act {
   position: relative;
-  height: 2000vh;          /* scroll length that scrubs the 3D timeline */
+  height: 2020vh;          /* scroll length that scrubs the 3D timeline */
 }
 .camera-stage {
   position: sticky;

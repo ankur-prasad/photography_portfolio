@@ -6,9 +6,9 @@ function clamp01(x: number) {
 
 /** Label for the camera act, keyed off the act's own scroll progress. */
 function camLabel(p: number) {
-  if (p < 0.10909) return "001 — SIGNAL";
-  if (p < 0.70) return "002 — THE APPARATUS";
-  if (p < 0.785) return "003 — THE EYE";
+  if (p < 0.10891) return "001 — SIGNAL";
+  if (p < 0.70297) return "002 — THE APPARATUS";
+  if (p < 0.78708) return "003 — THE EYE";
   return "004 — RECOMPOSE";
 }
 

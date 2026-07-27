@@ -83,7 +83,7 @@ function CameraRig({
     // drives the on-screen favorites overlay off the projected LCD rect, so
     // dollying back there would shrink/misalign it. Ramp the dolly out for it.
     const pc = cur.current;
-    const env = 1 - smoothstep(0.70, 0.755, pc) * (1 - smoothstep(0.975, 0.99, pc));
+    const env = 1 - smoothstep(0.70297, 0.75797, pc) * (1 - smoothstep(0.97525, 0.99025, pc));
     const effFit = 1 + (fit - 1) * env;
     if (effFit !== 1) targetPos.sub(targetLook).multiplyScalar(effFit).add(targetLook);
 
@@ -115,15 +115,15 @@ function CameraRig({
    number ≈ p * 1833.3): "hero" title fades out at frame 75 (p 0.04092), the
    "Pull back..." caption joins at frame 86 (p 0.04692) — leaving a brief,
    caption-free "pause" window — and hands off to beat 1's "PART 01 / 06
-   VIEWFINDER" card exactly at frame 200 (p 0.10909, also beatFor's threshold)
+   VIEWFINDER" card exactly at frame ~200 (p 0.10891, also beatFor's threshold)
    so the two captions never overlap. */
 function phaseFor(p: number): "hero" | "pause" | "reveal" | "parts" | "thesis" | "favorites" | "exploded" {
   if (p < 0.04092) return "hero";
   if (p < 0.04692) return "pause";
-  if (p < 0.10909) return "reveal";
-  if (p < 0.70) return "parts";
-  if (p < 0.785) return "thesis";
-  if (p < 0.975) return "favorites";
+  if (p < 0.10891) return "reveal";
+  if (p < 0.70297) return "parts";
+  if (p < 0.78708) return "thesis";
+  if (p < 0.97525) return "favorites";
   return "exploded";
 }
 
@@ -164,9 +164,9 @@ export default function CameraExperience() {
       // Determine active overlay from scroll progress
       setActiveOverlay((prev) => {
         let next: "none" | "favorites" | "footer" = "none";
-        if (p >= 0.785 && p < 0.96) {
+        if (p >= 0.78708 && p < 0.96025) {
           next = "favorites";
-        } else if (p >= 0.975) {
+        } else if (p >= 0.97525) {
           next = "footer";
         }
         return prev === next ? prev : next;
@@ -174,7 +174,7 @@ export default function CameraExperience() {
 
       // Track whether the favorites overlay should be interactive (fully zoomed in)
       setFavoritesInteractive((prev) => {
-        const next = p >= 0.79 && p < 0.955;
+        const next = p >= 0.79208 && p < 0.95525;
         return prev === next ? prev : next;
       });
     };
@@ -277,8 +277,8 @@ export default function CameraExperience() {
 
 
 
-  const footerOpacity = useTransform(scrollProgressVal, [0.975, 0.99], [0, 1]);
-  const footerTranslateY = useTransform(scrollProgressVal, [0.975, 0.995, 1.00], ["100%", "0%", "0%"]);
+  const footerOpacity = useTransform(scrollProgressVal, [0.97525, 0.99025], [0, 1]);
+  const footerTranslateY = useTransform(scrollProgressVal, [0.97525, 0.99525, 1.00], ["100%", "0%", "0%"]);
 
   return (
     <section className="camera-act" ref={section}>

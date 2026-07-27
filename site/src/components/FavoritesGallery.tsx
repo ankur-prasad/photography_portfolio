@@ -52,7 +52,7 @@ export default function FavoritesGallery({ scrollYProgress }: FavoritesGalleryPr
   // gallery scrolls through its full height more slowly and smoothly.
   const scrollFactor = useTransform(
     scrollYProgress,
-    [0.79, 0.955],
+    [0.79208, 0.95525],
     [0, 1]
   );
 

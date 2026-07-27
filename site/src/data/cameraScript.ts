@@ -126,15 +126,15 @@ export const PARTS: Part[] = [
    0 hero · 1 viewfinder · 2 lens · 3 aperture · 4 shutter · 5 sensor ·
    6 processor · 7 thesis/handoff · 8 favorites (lcd zoom) · 9 exploded/footer */
 export function beatFor(p: number): number {
-  if (p < 0.10909) return 0;
-  if (p < 0.21) return 1;
-  if (p < 0.31) return 2;
-  if (p < 0.41) return 3;
-  if (p < 0.51) return 4;
-  if (p < 0.60) return 5;
-  if (p < 0.70) return 6;
-  if (p < 0.79) return 7; // processor → LCD handoff (slow swing + settle)
-  if (p < 0.975) return 8; // favorites — widened so the gallery scrolls at ~site pace
+  if (p < 0.10891) return 0;
+  if (p < 0.20792) return 1;
+  if (p < 0.30693) return 2;
+  if (p < 0.40594) return 3;
+  if (p < 0.50495) return 4;
+  if (p < 0.60396) return 5;
+  if (p < 0.70297) return 6;
+  if (p < 0.79208) return 7; // processor → LCD handoff (slow swing + settle)
+  if (p < 0.97525) return 8; // favorites — widened so the gallery scrolls at ~site pace
   return 9;
 }
 
@@ -161,20 +161,20 @@ export function viewfinderIndexFor(p: number, count: number): number {
    off" so the open mount + sensor read (shutter, sensor, processor beats),
    and re-mounts for the closing settle. */
 export function lensVisFor(p: number): number {
-  const off = smoothstep(0.41, 0.45, p); // detaches after the aperture beat
-  const on = smoothstep(0.68, 0.73, p);  // re-mounts right after the sensor beat
+  const off = smoothstep(0.40594, 0.44594, p); // detaches after the aperture beat
+  const on = smoothstep(0.68297, 0.73297, p);  // re-mounts right after the sensor beat
   return 1 - off + on;
 }
 
 /* the built mount interior (cap-cover + sensor well) is shown while the lens
    is off */
 export function mountOpenFor(p: number): number {
-  return smoothstep(0.41, 0.45, p) * (1 - smoothstep(0.68, 0.73, p));
+  return smoothstep(0.40594, 0.44594, p) * (1 - smoothstep(0.68297, 0.73297, p));
 }
 
 /* the purple sensor fades in for its own beat */
 export function sensorVisFor(p: number): number {
-  return smoothstep(0.51, 0.54, p) * (1 - smoothstep(0.68, 0.73, p));
+  return smoothstep(0.50495, 0.53495, p) * (1 - smoothstep(0.68297, 0.73297, p));
 }
 
 /* shutter curtain: present for the shutter beat, and stays parked (open, at
@@ -183,18 +183,18 @@ export function sensorVisFor(p: number): number {
    top/bottom of the sensor cutout. Clears right after the sensor beat, when
    the lens re-mounts and hides the mount opening anyway. */
 export function shutterVisFor(p: number): number {
-  return smoothstep(0.41, 0.45, p) * (1 - smoothstep(0.68, 0.73, p));
+  return smoothstep(0.40594, 0.44594, p) * (1 - smoothstep(0.68297, 0.73297, p));
 }
 
 /* shutter open amount: closed at the start of the shutter beat, opens and
    stays open to reveal the sensor */
 export function shutterOpenFor(p: number): number {
-  return smoothstep(0.43, 0.48, p);
+  return smoothstep(0.42594, 0.47594, p);
 }
 
 /* iris (inside the lens) reacts like a pupil across the aperture beat */
 export function irisOpenFor(p: number): number {
-  const narrow = smoothstep(0.32, 0.35, p) * (1 - smoothstep(0.38, 0.41, p));
+  const narrow = smoothstep(0.31693, 0.34693, p) * (1 - smoothstep(0.37594, 0.40594, p));
   return 1.0 - narrow * 0.85;
 }
 
@@ -207,7 +207,7 @@ export function irisOpenFor(p: number): number {
    not just the front opening. Unchanged from the original aperture-beat
    reveal (Ankur: keep this behaviour as-is, aperture through sensor). */
 export function lensGlassDipFor(p: number): number {
-  return smoothstep(0.32, 0.35, p) * (1 - smoothstep(0.38, 0.41, p));
+  return smoothstep(0.31693, 0.34693, p) * (1 - smoothstep(0.37594, 0.40594, p));
 }
 
 /* the front cap disc (CameraModel's M.frontGlass) is a thin, dedicated disc
@@ -239,13 +239,13 @@ export const SHOTS: Shot[] = [
   { p: 0.23, focus: "lensMid", dir: [0.92, 0.32, 0.55], dist: 3.7 }, // side-3/4
   { p: 0.35, focus: [0.202, -0.127, 0.5], dir: [0.016, 0.048, 0.993], dist: 3.858 }, // front element (iris)
   { p: 0.48, focus: [0.207, -0.118, 0.58], dir: [0.018, 0.046, 0.998], dist: 2.568 }, // open mount (shutter)
-  { p: 0.60, focus: [0.21, -0.114, 0.705], dir: [0.016, 0.037, 0.99], dist: 1.172 }, // the sensor
-  { p: 0.70, focus: "body", dir: [-0.77, 0.267, 0.58], dist: 4.866 }, // processor — whole body, 3/4
-  { p: 0.755, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // slow swing from the processor around to the LCD (back)
-  { p: 0.77, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // hold pulled back looking straight at screen (thesis reads)
-  { p: 0.79, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // gentle zoom into LCD screen
-  { p: 0.955, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // hold zoomed in through the long favorites scroll
-  { p: 0.975, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // gentle zoom out straight from LCD screen
+  { p: 0.60396, focus: [0.21, -0.114, 0.705], dir: [0.016, 0.037, 0.99], dist: 1.172 }, // the sensor
+  { p: 0.70297, focus: "body", dir: [-0.77, 0.267, 0.58], dist: 4.866 }, // processor — whole body, 3/4
+  { p: 0.75797, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // slow swing from the processor around to the LCD (back)
+  { p: 0.77208, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // hold pulled back looking straight at screen (thesis reads)
+  { p: 0.79208, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // gentle zoom into LCD screen
+  { p: 0.95525, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 0.85 }, // hold zoomed in through the long favorites scroll
+  { p: 0.97525, focus: PLACEMENT.lcdScreen.position, dir: [0, 0, -1], dist: 3.6 }, // gentle zoom out straight from LCD screen
   { p: 1.00, focus: [0.1, -0.1, 0.0], dir: [0.0, 0.98, -0.2], dist: 3.8 }, // top view of fully-assembled camera
 ];
 
