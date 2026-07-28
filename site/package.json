@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "models:optimize": "node tools/optimize_models.mjs",
+    "models:inspect": "gltf-transform inspect",
+    "models:verify": "node --experimental-strip-types tools/verify_models.mjs",
+    "photos:dims": "node tools/backfill_photo_dims.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
@@ -27,6 +31,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@gltf-transform/cli": "^4.2.1",
+    "@gltf-transform/core": "^4.2.1",
+    "@gltf-transform/extensions": "^4.2.1",
+    "@gltf-transform/functions": "^4.2.1",
+    "meshoptimizer": "^0.25.0",
+    "sharp": "^0.34.5",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

@@ -12,7 +12,29 @@
      +X = grip side
    ========================================================================== */
 
-export type Vec3 = [number, number, number];
+/* The scene-agnostic maths, Shot/pose types and flight sampler moved to
+   sceneScript when /work and /prints gained 3D acts of their own. They are
+   re-exported here so every existing import of this module still resolves and
+   the home page's behaviour is unchanged. */
+import {
+  type Anchors,
+  type Shot,
+  type Vec3,
+  clamp01,
+  easeInOut,
+  lerp,
+  norm,
+  samplePoseIn,
+  shotToPoseIn,
+  smoothstep,
+  vlerp,
+} from "./sceneScript";
+
+/* Imported into scope above (this module's own beat functions call smoothstep)
+   and re-exported here, so existing `from "../data/cameraScript"` imports of
+   these helpers keep resolving. */
+export { clamp01, easeInOut, lerp, norm, smoothstep, vlerp };
+export type { Vec3, Shot, Pose } from "./sceneScript";
 
 /* body is scaled so its HEIGHT maps to this many world units (height is the
    one bbox dimension not inflated by the strap-lug scan artefacts). */
@@ -226,12 +248,6 @@ export function frontGlassDipFor(p: number): number {
    dir = direction from the focus point out to the camera (will be normalised)
    dist = how far back along dir
    up   = optional camera up tweak (default +Y) */
-export interface Shot {
-  p: number;
-  focus: keyof typeof ANCHOR | Vec3;
-  dir: Vec3;
-  dist: number;
-}
 export const SHOTS: Shot[] = [
   /* on the viewfinder photo itself — true zoom-out starts here */
   { p: 0.0, focus: PLACEMENT.zoomTarget.position, dir: [0.004, 0.05, -0.965], dist: 0.15 },
@@ -249,47 +265,14 @@ export const SHOTS: Shot[] = [
   { p: 1.00, focus: [0.1, -0.1, 0.0], dir: [0.0, 0.98, -0.2], dist: 3.8 }, // top view of fully-assembled camera
 ];
 
-/* ---- math helpers (shared) ---- */
-export function clamp01(x: number) {
-  return Math.min(1, Math.max(0, x));
-}
-export function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
-export function smoothstep(a: number, b: number, x: number) {
-  const t = clamp01((x - a) / (b - a));
-  return t * t * (3 - 2 * t);
-}
-export function easeInOut(x: number) {
-  return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
-}
-
-function vlerp(a: Vec3, b: Vec3, t: number): Vec3 {
-  return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
-}
-function norm(v: Vec3): Vec3 {
-  const l = Math.hypot(v[0], v[1], v[2]) || 1;
-  return [v[0] / l, v[1] / l, v[2] / l];
-}
-
-/* resolve a shot to an absolute camera position + look-at target */
+/* ---- camera flight, bound to this scene's anchors ----
+   Thin wrappers so callers keep the one-argument signatures they already use;
+   the implementations live in sceneScript and are shared with /work and
+   /prints. */
 export function shotToPose(s: Shot): { pos: Vec3; target: Vec3 } {
-  const t = Array.isArray(s.focus) ? s.focus : ANCHOR[s.focus];
-  const d = norm(s.dir);
-  return { pos: [t[0] + d[0] * s.dist, t[1] + d[1] * s.dist, t[2] + d[2] * s.dist], target: t };
+  return shotToPoseIn(ANCHOR as Anchors, s);
 }
 
-/* sample the flight at progress p — interpolates pose between adjacent shots */
 export function samplePose(p: number): { pos: Vec3; target: Vec3 } {
-  if (p <= SHOTS[0].p) return shotToPose(SHOTS[0]);
-  if (p >= SHOTS[SHOTS.length - 1].p) return shotToPose(SHOTS[SHOTS.length - 1]);
-  for (let i = 0; i < SHOTS.length - 1; i++) {
-    const a = SHOTS[i], b = SHOTS[i + 1];
-    if (p >= a.p && p <= b.p) {
-      const e = smoothstep(a.p, b.p, p);
-      const pa = shotToPose(a), pb = shotToPose(b);
-      return { pos: vlerp(pa.pos, pb.pos, e), target: vlerp(pa.target, pb.target, e) };
-    }
-  }
-  return shotToPose(SHOTS[SHOTS.length - 1]);
+  return samplePoseIn(ANCHOR as Anchors, SHOTS, p);
 }

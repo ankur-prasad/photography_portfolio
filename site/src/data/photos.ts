@@ -84,5 +84,5 @@ export const pillars: Pillar[] = [
   }
 ];
 
-export interface PhotoMeta { title?: string; location?: string; story?: string; year?: string; camera?: string; lens?: string; settings?: string; print?: boolean; depthId?: string }
+export interface PhotoMeta { title?: string; location?: string; story?: string; year?: string; camera?: string; lens?: string; settings?: string; print?: boolean; depthId?: string; w?: number; h?: number }
 export interface PhotoData { pillars: Pillar[]; galleries: Record<string, string[]>; meta: Record<string, PhotoMeta> }

@@ -46,6 +46,12 @@ export const COLOR_HEX: Record<string, string> = {
   "light grey": "#a9a9ad",
 };
 
+/** Physical mount/gap between the print and the frame, in cm, by finish type.
+ *  Lives here rather than in a preview component because both the CSS
+ *  RoomPreview and the 3D RoomScene render it to scale — if they disagreed,
+ *  the two views would describe differently-sized objects. */
+export const MOUNT_CM: Record<string, number> = { "box-frame": 6, "framed-canvas": 1.5 };
+
 export type CropLevel = "none" | "slight" | "fit";
 
 export interface SizedOption extends CatalogSize {

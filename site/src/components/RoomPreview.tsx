@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { dimsFor, COLOR_HEX, type CatalogFinish, type CatalogSize } from "../data/printConfig";
+import { dimsFor, COLOR_HEX, MOUNT_CM, type CatalogFinish, type CatalogSize } from "../data/printConfig";
 
 /** The visible wall spans this many cm — everything in the scene is scaled
  *  against it, so the print resizes true-to-scale as sizes change. */
@@ -8,9 +8,9 @@ const SOFA_CM = 220;
 
 const COLORABLE = new Set(["box-frame", "framed-canvas"]);
 
-/** physical mount/gap between frame and print, in cm — rendered to scale
- *  (CSS percentage padding resolves against the WALL, so cm→% is exact) */
-const MOUNT_CM: Record<string, number> = { "box-frame": 6, "framed-canvas": 1.5 };
+/* MOUNT_CM (the physical mount/gap between frame and print) moved to
+   data/printConfig so RoomScene renders the same measurement to scale in 3D.
+   CSS percentage padding resolves against the WALL, so cm→% here is exact. */
 
 /**
  * A drawn-from-scratch room scene (no stock mockups): dark plaster wall, a
