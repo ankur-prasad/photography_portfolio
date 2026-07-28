@@ -2,4 +2,14 @@
 
 # Full-resolution photo originals (640MB+) — source of truth lives outside git
 assets/originals/
+
+# Unoptimised source GLBs (178MB: art_gallery 44MB + modern_living_room 133MB).
+# These must never live under site/public/ — Vite copies public/ verbatim into
+# dist/, so a source GLB there ships to production. Run
+# `npm run models:optimize` in site/ to regenerate the committed
+# site/public/models/*.min.glb from these.
+# No trailing slash: in git worktrees this path is often a symlink to the main
+# checkout's copy, and a "dir/" pattern does not match a symlink.
+assets/models-src
+
 tools/__pycache__/

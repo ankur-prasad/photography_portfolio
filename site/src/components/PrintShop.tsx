@@ -35,9 +35,18 @@ export default function PrintShop({
   const [skuChoice, setSkuChoice] = useState<string | null>(null);
   const [colorChoice, setColorChoice] = useState<string | null>(null);
   const [optChoice, setOptChoice] = useState<string | null>(null);
-  const [aspect, setAspect] = useState(1.5);
+  /* The photo's aspect ratio decides which SKUs are offered (bestSizes scores
+     every size against it) and how large the preview draws, so it has to be
+     right on the FIRST render — not after an image load. photos.json now
+     carries w/h for every photo; the <img onLoad> probe below stays as a
+     fallback for anything missing them. Before this, the default of 1.5 gave
+     the wrong size list on first paint for the 37 photos that are not 3:2. */
+  const [probedAspect, setProbedAspect] = useState(1.5);
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
+
+  const meta = photos?.meta[selected];
+  const aspect = meta?.w && meta?.h ? meta.w / meta.h : probedAspect;
 
   const finish = finishes.find((f) => f.key === finishKey) ?? finishes[0];
   if (!finish) {
@@ -53,7 +62,7 @@ export default function PrintShop({
   const optValues = optKey ? finish.options[optKey] : [];
   const opt = optValues.includes(optChoice ?? "") ? optChoice! : optValues[0];
 
-  const m = photos?.meta[selected] ?? {};
+  const m = meta ?? {};
   const dims = dimsFor(size, aspect);
   const id = stemOf(selected);
   const inquiryHref =
@@ -89,7 +98,7 @@ export default function PrintShop({
               size={size}
               finish={finish}
               color={color}
-              onAspect={setAspect}
+              onAspect={setProbedAspect}
             />
           </div>
 

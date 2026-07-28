@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
 import { usePageTitle } from "../lib/usePageTitle";
 import { usePhotos } from "../lib/usePhotos";
+import { canRenderHeavy3D } from "../lib/canRender3D";
+import { usePrintConfig } from "../lib/usePrintConfig";
 import Photo from "../components/Photo";
 import PrintShop from "../components/PrintShop";
 import PrintWaitlist from "../components/PrintWaitlist";
 import Footer from "../components/Footer";
+
+/* The 3D room pulls in three.js, so it stays out of this page's chunk for
+   everyone who will not see it. */
+const PrintsRoom = lazy(() => import("../components/PrintsRoom"));
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -43,13 +49,26 @@ export default function PrintsPage() {
   const picks = PICKS.includes(selected) ? PICKS : [selected, ...PICKS];
   const META = usePhotos()?.meta ?? {};
 
+  /* One config for whichever presentation renders, so the room walk and the flat
+     configurator can never disagree about the SKU or the price. */
+  const cfg = usePrintConfig(selected);
+
+  /* Probe after mount: it touches window and makes a throwaway GL context.
+     Failing closed means everyone gets the flat configurator until we know the
+     machine can carry a room — this page takes orders, and the flat version is
+     instant, accessible and to-scale. */
+  const [room3d, setRoom3d] = useState(false);
+  useEffect(() => setRoom3d(canRenderHeavy3D()), []);
+
   const pick = (src: string) => {
     setSelected(src);
     document.getElementById("configure")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const immersive = room3d && cfg.ready;
+
   return (
-    <main className="page prints">
+    <main className={immersive ? "page prints is-immersive" : "page prints"}>
       {orderSuccess && (
         <div className="order-success" role="status">
           <div className="container">
@@ -60,25 +79,35 @@ export default function PrintsPage() {
           </div>
         </div>
       )}
-      <section className="prints-hero">
-        <div className="container">
-          <motion.p className="eyebrow" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.8, ease: EASE }}>
-            // Prints
-          </motion.p>
-          <motion.h1 className="prints-title" initial={{ opacity: 0, y: 26 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.9, ease: EASE }}>
-            Take one home.
-          </motion.h1>
-          <motion.p className="prints-lede" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.1, ease: EASE }}>
-            A frame you keep returning to, printed the way it deserves — archival, limited and
-            signed. Pick one below and see it on your wall, at true scale.
-          </motion.p>
-        </div>
-      </section>
+      {immersive ? (
+        /* The room is the backdrop and every option lives in one panel beside
+           it. The hero copy moves into that panel's header. */
+        <Suspense fallback={null}>
+          <PrintsRoom cfg={cfg} picks={picks} selected={selected} onSelect={setSelected} />
+        </Suspense>
+      ) : (
+        <>
+          <section className="prints-hero">
+            <div className="container">
+              <motion.p className="eyebrow" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }} transition={{ duration: 0.8, ease: EASE }}>
+                // Prints
+              </motion.p>
+              <motion.h1 className="prints-title" initial={{ opacity: 0, y: 26 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }} transition={{ duration: 0.9, ease: EASE }}>
+                Take one home.
+              </motion.h1>
+              <motion.p className="prints-lede" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.1, ease: EASE }}>
+                A frame you keep returning to, printed the way it deserves — archival, limited and
+                signed. Pick one below and see it on your wall, at true scale.
+              </motion.p>
+            </div>
+          </section>
 
-      <PrintShop picks={picks} selected={selected} onSelect={setSelected} />
+          <PrintShop picks={picks} selected={selected} onSelect={setSelected} />
+        </>
+      )}
 
       <section className="prints-meta-sec">
         <div className="container">

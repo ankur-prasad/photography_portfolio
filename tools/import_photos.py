@@ -197,6 +197,16 @@ def main():
         m["print"] = sc.get("print", True)
         if stem in hero_ids:
             m["depthId"] = stem
+        # Rendered pixel size of the /web/ variant. The 3D scenes need an aspect
+        # ratio BEFORE the first frame is drawn (a quad has to be sized to
+        # something), and bestSizes() in printConfig picks a different SKU list
+        # per aspect. Without this both fall back to assuming 3:2, which is
+        # wrong for 37 of the 93 photos (21 are portrait, 5 are panoramas).
+        try:
+            with Image.open(f"{WEB}/{stem}.jpg") as im:
+                m["w"], m["h"] = im.size
+        except OSError:
+            pass
         meta[web_src] = m
 
     pillars = [{"key": k, "no": f"{i:02d}", "title": pillar_def[k][0], "blurb": pillar_def[k][1]}
@@ -223,7 +233,7 @@ def main():
     ts += "export const pillars: Pillar[] = " + json.dumps(pillars, indent=2, ensure_ascii=False) + ";\n\n"
     ts += ("export interface PhotoMeta { title?: string; location?: string; story?: string; "
            "year?: string; camera?: string; lens?: string; settings?: string; print?: boolean; "
-           "depthId?: string }\n")
+           "depthId?: string; w?: number; h?: number }\n")
     ts += "export interface PhotoData { pillars: Pillar[]; galleries: Record<string, string[]>; "
     ts += "meta: Record<string, PhotoMeta> }\n"
     open(TS_OUT, "w").write(ts)
